@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-base: #f5f6fa;
+  --bg-surface: #ffffff;
+  --bg-surface-alt: #f8f9fc;
+
+  --accent-primary: #ff902f;
+  --accent-primary-dark: #e07b1a;
+  --accent-secondary: #1b2e4b;
+
+  --text-primary: #1b2e4b;
+  --text-secondary: #6e82a0;
+  --text-muted: #a3b1c6;
+
+  --border-default: #e8eef4;
+  --border-focus: #ff902f;
+
+  --state-success: #00d68f;
+  --state-success-bg: #e6fbf4;
+  --state-warning: #ffaa00;
+  --state-warning-bg: #fff8e6;
+  --state-error: #ff4c61;
+  --state-error-bg: #ffeef0;
+  --state-info: #2196f3;
+  --state-info-bg: #e8f4fd;
+
+  --sidebar-bg: #1b2e4b;
+  --sidebar-text: #a3bdcc;
+  --sidebar-active: #ffffff;
+  --sidebar-active-bg: #ff902f;
+
+  --shadow-card: 0 2px 8px rgba(27, 46, 75, 0.08);
+
+  --font-sans: 'Nunito', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+}
+
+#root {
+  min-height: 100vh;
+}
