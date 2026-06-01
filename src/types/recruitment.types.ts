@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { DEFAULT_CURRENCY } from '../config/currency.config'
 
 export type JobStatus = 'draft' | 'open' | 'closed'
 export type CandidateStatus =
@@ -14,6 +15,7 @@ export type CandidateSource = 'direct' | 'referral' | 'job_board'
 
 export const JobPostingSchema = z.object({
   id: z.string(),
+  companyId: z.string(),
   title: z.string(),
   department: z.object({ id: z.string(), name: z.string() }),
   designation: z.object({ id: z.string(), name: z.string() }).optional(),
@@ -24,7 +26,7 @@ export const JobPostingSchema = z.object({
     .object({
       min: z.number(),
       max: z.number(),
-      currency: z.string().default('USD'),
+      currency: z.string().default(DEFAULT_CURRENCY),
     })
     .optional(),
   description: z.string(),
@@ -63,6 +65,7 @@ export type JobFormInput = z.infer<typeof JobFormSchema>
 
 export const CandidateSchema = z.object({
   id: z.string(),
+  companyId: z.string(),
   fullName: z.string(),
   email: z.string().email(),
   phone: z.string().optional(),
@@ -94,6 +97,7 @@ export type CandidateFormInput = z.infer<typeof CandidateFormSchema>
 
 export const ReferralSchema = z.object({
   id: z.string(),
+  companyId: z.string(),
   referrer: z.object({
     id: z.string(),
     name: z.string(),

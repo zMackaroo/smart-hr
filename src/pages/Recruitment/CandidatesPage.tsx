@@ -1,4 +1,5 @@
 import { Plus, Search, Users } from 'lucide-react'
+import { PermissionGate } from '../../components/shared/PermissionGate'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Button } from '../../components/ui/Button'
 import { EmptyState } from '../../components/shared/EmptyState'
@@ -31,10 +32,12 @@ export function CandidatesPage() {
         title="Candidates"
         breadcrumbs={[{ label: 'Recruitment' }, { label: 'Candidates' }]}
         actions={
-          <Button onClick={vm.openAddModal}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Candidate
-          </Button>
+          <PermissionGate module="recruitment" action="create">
+            <Button onClick={vm.openAddModal}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Candidate
+            </Button>
+          </PermissionGate>
         }
       />
 
@@ -91,10 +94,12 @@ export function CandidatesPage() {
           description="Add a candidate or adjust your filters."
           icon={Users}
           action={
-            <Button onClick={vm.openAddModal}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Candidate
-            </Button>
+            <PermissionGate module="recruitment" action="create">
+              <Button onClick={vm.openAddModal}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Candidate
+              </Button>
+            </PermissionGate>
           }
         />
       ) : (

@@ -7,6 +7,7 @@ export interface AuthUser {
   name: string
   email: string
   role: UserRole
+  customRoleId?: string
   avatarUrl?: string
   companyId?: string
 }
@@ -61,6 +62,7 @@ export const AuthResponseSchema = z.object({
     name: z.string(),
     email: z.string(),
     role: z.enum(['super_admin', 'hr_admin', 'employee']),
+    customRoleId: z.string().optional(),
     avatarUrl: z.string().optional(),
     companyId: z.string().optional(),
   }),

@@ -25,7 +25,7 @@ export function PayslipCard({ payslip, onView, onDownload }: PayslipCardProps) {
           View Details
         </Button>
         <Button variant="outline" size="sm" className="flex-1" onClick={() => onDownload(payslip.id)}>
-          Download
+          Download PDF
         </Button>
       </div>
     </div>

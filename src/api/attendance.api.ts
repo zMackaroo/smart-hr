@@ -123,6 +123,7 @@ function ensureMonthData(year: number, month: number) {
       newRecords.push(
         AttendanceRecordSchema.parse({
           id: `att-${employee.id}-${date}`,
+          companyId: employee.companyId,
           employeeId: employee.id,
           employeeName: employee.fullName,
           avatarUrl: employee.avatarUrl,
@@ -293,6 +294,7 @@ export async function clockIn(employeeId: string): Promise<ClockStatus> {
   const isLate = Number(now.split(':')[0]) >= 9 && Number(now.split(':')[1]) > 15
   const record = AttendanceRecordSchema.parse({
     id: existing?.id ?? `att-${employeeId}-${today}`,
+    companyId: employee.companyId,
     employeeId,
     employeeName: employee.fullName,
     avatarUrl: employee.avatarUrl,

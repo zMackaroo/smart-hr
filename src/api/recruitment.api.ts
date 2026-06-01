@@ -17,6 +17,7 @@ import {
   type ReferralStatus,
 } from '../types/recruitment.types'
 import { getAllEmployeesForPayroll } from './employees.api'
+import { DEFAULT_CURRENCY } from '../config/currency.config'
 import { findDepartment, findDesignation } from './org-data'
 
 const MOCK_DELAY_MS = 350
@@ -40,7 +41,7 @@ function syncApplicantCounts() {
 }
 
 function seedJobs(): JobPosting[] {
-  const jobs: Array<Omit<JobPosting, 'id' | 'applicantsCount'>> = [
+  const jobs: Array<Omit<JobPosting, 'id' | 'applicantsCount' | 'companyId'>> = [
     {
       title: 'Software Engineer',
       department: { id: 'dept-1', name: 'Engineering' },
@@ -48,7 +49,7 @@ function seedJobs(): JobPosting[] {
       location: 'San Francisco',
       employmentType: 'full_time',
       experienceLevel: '1–3 years',
-      salaryRange: { min: 80000, max: 120000, currency: 'USD' },
+      salaryRange: { min: 80000, max: 120000, currency: DEFAULT_CURRENCY },
       description: 'Build and maintain core product features for our HR platform.',
       requirements: 'BS in CS or equivalent. 1+ years React/TypeScript experience.',
       status: 'open',
@@ -65,7 +66,7 @@ function seedJobs(): JobPosting[] {
       location: 'Remote',
       employmentType: 'full_time',
       experienceLevel: '5+ years',
-      salaryRange: { min: 120000, max: 160000, currency: 'USD' },
+      salaryRange: { min: 120000, max: 160000, currency: DEFAULT_CURRENCY },
       description: 'Lead technical initiatives and mentor junior engineers.',
       requirements: '5+ years full-stack development. Strong system design skills.',
       status: 'open',
@@ -81,7 +82,7 @@ function seedJobs(): JobPosting[] {
       location: 'Boston',
       employmentType: 'full_time',
       experienceLevel: 'Senior',
-      salaryRange: { min: 70000, max: 95000, currency: 'USD' },
+      salaryRange: { min: 70000, max: 95000, currency: DEFAULT_CURRENCY },
       description: 'Oversee HR operations and employee relations.',
       requirements: 'HR certification preferred. 5+ years HR management experience.',
       status: 'open',
@@ -110,7 +111,7 @@ function seedJobs(): JobPosting[] {
       location: 'Seattle',
       employmentType: 'full_time',
       experienceLevel: '2–4 years',
-      salaryRange: { min: 65000, max: 90000, currency: 'USD' },
+      salaryRange: { min: 65000, max: 90000, currency: DEFAULT_CURRENCY },
       description: 'Design intuitive user experiences for our HR products.',
       requirements: 'Portfolio required. Figma proficiency essential.',
       status: 'open',
@@ -136,7 +137,7 @@ function seedJobs(): JobPosting[] {
   ]
 
   return jobs.map((job) =>
-    JobPostingSchema.parse({ ...job, id: `job-${nextJobId++}`, applicantsCount: 0 }),
+    JobPostingSchema.parse({ ...job, companyId: 'co-1', id: `job-${nextJobId++}`, applicantsCount: 0 }),
   )
 }
 
@@ -164,6 +165,7 @@ function seedCandidates(jobs: JobPosting[]): Candidate[] {
     const job = openJobs[index % openJobs.length]
     return CandidateSchema.parse({
       id: `cand-${nextCandidateId++}`,
+      companyId: job.companyId,
       fullName: item.name,
       email: item.email,
       phone: '+1 555-0100',
@@ -198,6 +200,7 @@ function seedReferrals(jobs: JobPosting[]): Referral[] {
     const job = openJobs[index % openJobs.length]
     return ReferralSchema.parse({
       id: `ref-${nextReferralId++}`,
+      companyId: referrer.companyId,
       referrer: {
         id: referrer.id,
         name: referrer.fullName,
@@ -234,6 +237,7 @@ function buildJobFromForm(data: JobFormInput, id: string, existing?: JobPosting)
 
   return JobPostingSchema.parse({
     id,
+    companyId: department.companyId,
     title: data.title,
     department: { id: department.id, name: department.name },
     designation: designation ? { id: designation.id, name: designation.name } : undefined,
@@ -242,7 +246,7 @@ function buildJobFromForm(data: JobFormInput, id: string, existing?: JobPosting)
     experienceLevel: data.experienceLevel,
     salaryRange:
       data.salaryMin !== undefined && data.salaryMax !== undefined
-        ? { min: data.salaryMin, max: data.salaryMax, currency: 'USD' }
+        ? { min: data.salaryMin, max: data.salaryMax, currency: DEFAULT_CURRENCY }
         : undefined,
     description: data.description,
     requirements: data.requirements,
@@ -385,6 +389,7 @@ export async function createCandidate(data: CandidateFormInput): Promise<Candida
 
   const candidate = CandidateSchema.parse({
     id: `cand-${nextCandidateId++}`,
+    companyId: job.companyId,
     fullName: data.fullName,
     email: data.email,
     phone: data.phone,
@@ -512,6 +517,7 @@ export async function submitReferral(
 
   const referral = ReferralSchema.parse({
     id: `ref-${nextReferralId++}`,
+    companyId: employee.companyId,
     referrer: {
       id: employee.id,
       name: employee.fullName,

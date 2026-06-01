@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 export const DepartmentSchema = z.object({
   id: z.string(),
+  companyId: z.string(),
   name: z.string(),
   description: z.string().optional(),
   headEmployee: z

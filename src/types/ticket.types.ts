@@ -26,6 +26,7 @@ export type TicketComment = z.infer<typeof TicketCommentSchema>
 
 export const TicketSchema = z.object({
   id: z.string(),
+  companyId: z.string(),
   ticketNumber: z.string(),
   subject: z.string(),
   description: z.string(),

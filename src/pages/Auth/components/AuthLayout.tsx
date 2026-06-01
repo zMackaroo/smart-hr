@@ -5,6 +5,9 @@ import logo from '../../../assets/logo.svg'
 
 interface AuthLayoutProps {
   children: ReactNode
+  brandName?: string
+  brandLogoUrl?: string
+  tagline?: string
 }
 
 const highlights = [
@@ -13,7 +16,15 @@ const highlights = [
   { icon: ShieldCheck, text: 'Secure role-based access' },
 ]
 
-export function AuthLayout({ children }: AuthLayoutProps) {
+export function AuthLayout({
+  children,
+  brandName = 'SmartHR',
+  brandLogoUrl,
+  tagline = 'Manage your workforce with confidence',
+}: AuthLayoutProps) {
+  const logoSrc = brandLogoUrl ?? logo
+  const isTenantBranded = brandName !== 'SmartHR'
+
   return (
     <div className="flex min-h-screen">
       <aside className="relative hidden w-[42%] flex-col overflow-hidden bg-navy lg:flex">
@@ -22,17 +33,18 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
         <div className="relative z-10 flex h-full flex-col p-10 xl:p-12">
           <div className="flex items-center gap-3">
-            <img src={logo} alt="" className="h-11 w-11 rounded-lg shadow-lg" aria-hidden="true" />
-            <span className="text-2xl font-bold tracking-tight text-white">SmartHR</span>
+            <img src={logoSrc} alt="" className="h-11 w-11 rounded-lg shadow-lg" aria-hidden="true" />
+            <span className="text-2xl font-bold tracking-tight text-white">{brandName}</span>
           </div>
 
           <div className="my-auto py-10">
             <h2 className="max-w-md text-4xl font-bold leading-tight tracking-tight text-white xl:text-[2.75rem]">
-              Manage your workforce with confidence
+              {tagline}
             </h2>
             <p className="mt-5 max-w-sm text-base leading-relaxed text-sidebar-text">
-              Streamline HR operations, attendance, payroll, and employee records in one
-              unified platform.
+              {isTenantBranded
+                ? `Sign in to access ${brandName}'s HR workspace — attendance, payroll, and employee records in one place.`
+                : 'Streamline HR operations, attendance, payroll, and employee records in one unified platform.'}
             </p>
 
             <ul className="mt-8 space-y-4">
@@ -60,8 +72,8 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
       <main className="flex min-h-screen flex-1 flex-col bg-base">
         <div className="flex items-center gap-3 border-b border-border bg-surface px-6 py-4 lg:hidden">
-          <img src={logo} alt="" className="h-9 w-9 rounded-lg" aria-hidden="true" />
-          <span className="text-lg font-bold text-primary">SmartHR</span>
+          <img src={logoSrc} alt="" className="h-9 w-9 rounded-lg" aria-hidden="true" />
+          <span className="text-lg font-bold text-primary">{brandName}</span>
         </div>
 
         <div className="flex flex-1 items-center justify-center px-4 py-8 sm:px-6 sm:py-12">

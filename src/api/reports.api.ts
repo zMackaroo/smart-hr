@@ -1,4 +1,5 @@
 import { format } from 'date-fns'
+import { CATEGORY_LABELS, type ExpenseStatus } from '../types/expense.types'
 import {
   ReportDataSchema,
   ReportMetaSchema,
@@ -9,10 +10,19 @@ import {
   type ReportRow,
   type ReportType,
 } from '../types/report.types'
+import { getExpenseClaimsForReport } from './expenses.api'
 import { getAttendance } from './attendance.api'
 import { getEmployees, getEmployeePickerOptions } from './employees.api'
 import { getLeaveRequests } from './leaves.api'
 import { getPayslips } from './payroll.api'
+import { formatDepositAccount } from '../types/bank-account.types'
+import { getPrimaryBankAccountSync } from './bank-accounts.api'
+import {
+  getProjectOptions,
+  getTasksForReport,
+  getTimeLogsForReport,
+} from './projects.api'
+import { TASK_STATUS_LABELS, type TaskStatus } from '../types/project.types'
 
 const MOCK_DELAY_MS = 400
 
@@ -57,13 +67,34 @@ const REPORT_TYPES: ReportMeta[] = [
     title: 'Expense Report',
     description: 'Expense claims summary.',
     icon: 'CreditCard',
-    available: false,
+    available: true,
   },
   {
     type: 'user_activity',
     title: 'User Activity',
     description: 'User login and action audit log.',
     icon: 'Activity',
+    available: true,
+  },
+  {
+    type: 'daily',
+    title: 'Daily Time Report',
+    description: 'Hours logged by employee and date from task time entries.',
+    icon: 'Clock',
+    available: true,
+  },
+  {
+    type: 'project',
+    title: 'Project Report',
+    description: 'Tasks and hours aggregated by project.',
+    icon: 'FolderKanban',
+    available: true,
+  },
+  {
+    type: 'task',
+    title: 'Task Report',
+    description: 'Task completion status and logged hours by assignee.',
+    icon: 'ListTodo',
     available: true,
   },
 ]
@@ -394,6 +425,7 @@ async function generatePaymentReport(
     { key: 'department', label: 'Department', align: 'left' },
     { key: 'payPeriod', label: 'Pay Period', align: 'left' },
     { key: 'netPay', label: 'Net Pay', align: 'right' },
+    { key: 'depositAccount', label: 'Deposit Account', align: 'left' },
     { key: 'paymentDate', label: 'Payment Date', align: 'left' },
     { key: 'status', label: 'Status', align: 'left' },
   ]
@@ -403,6 +435,7 @@ async function generatePaymentReport(
     department: p.employee.department,
     payPeriod: p.payPeriod.label,
     netPay: p.netPay,
+    depositAccount: formatDepositAccount(getPrimaryBankAccountSync(p.employee.id)),
     paymentDate: p.generatedAt,
     status: p.status,
   }))
@@ -475,6 +508,161 @@ function rowsToCsv(columns: ReportColumn[], rows: ReportRow[]): string {
   return [header, ...body].join('\n')
 }
 
+async function generateExpenseReport(
+  filters: ReportFilter,
+  page?: number,
+  perPage?: number,
+): Promise<ReportData> {
+  const claims = await getExpenseClaimsForReport({
+    month: filters.month,
+    year: filters.year,
+    departmentId: filters.departmentId,
+    status: filters.status as ExpenseStatus | undefined,
+  })
+
+  const columns: ReportColumn[] = [
+    { key: 'employee', label: 'Employee', align: 'left' },
+    { key: 'department', label: 'Department', align: 'left' },
+    { key: 'claimNumber', label: 'Claim #', align: 'left' },
+    { key: 'category', label: 'Category', align: 'left' },
+    { key: 'title', label: 'Title', align: 'left' },
+    { key: 'amount', label: 'Amount', align: 'right' },
+    { key: 'expenseDate', label: 'Expense Date', align: 'left' },
+    { key: 'status', label: 'Status', align: 'left' },
+    { key: 'submitted', label: 'Submitted', align: 'left' },
+  ]
+
+  const allRows: ReportRow[] = claims.map((claim) => ({
+    employee: claim.employee.name,
+    department: claim.employee.department,
+    claimNumber: claim.claimNumber,
+    category: CATEGORY_LABELS[claim.category],
+    title: claim.title,
+    amount: claim.amount,
+    expenseDate: claim.expenseDate,
+    status: claim.status,
+    submitted: claim.submittedDate.split('T')[0],
+  }))
+
+  return buildReportData('expense', 'Expense Report', filters, columns, allRows, page, perPage)
+}
+
+function generateDailyReport(
+  filters: ReportFilter,
+  page?: number,
+  perPage?: number,
+): ReportData {
+  const logs = getTimeLogsForReport({
+    dateFrom: filters.dateFrom,
+    dateTo: filters.dateTo,
+    employeeId: filters.employeeId,
+  })
+
+  const columns: ReportColumn[] = [
+    { key: 'date', label: 'Date', align: 'left' },
+    { key: 'employee', label: 'Employee', align: 'left' },
+    { key: 'project', label: 'Project', align: 'left' },
+    { key: 'task', label: 'Task', align: 'left' },
+    { key: 'hours', label: 'Hours', align: 'right' },
+    { key: 'notes', label: 'Notes', align: 'left' },
+  ]
+
+  const allRows: ReportRow[] = logs.map((log) => ({
+    date: log.date,
+    employee: log.employeeName,
+    project: log.projectName,
+    task: log.taskTitle,
+    hours: log.hours,
+    notes: log.notes ?? '—',
+  }))
+
+  return buildReportData('daily', 'Daily Time Report', filters, columns, allRows, page, perPage)
+}
+
+function generateProjectReport(
+  filters: ReportFilter,
+  page?: number,
+  perPage?: number,
+): ReportData {
+  const logs = getTimeLogsForReport({
+    dateFrom: filters.dateFrom,
+    dateTo: filters.dateTo,
+    projectId: filters.projectId,
+  })
+
+  const grouped = new Map<
+    string,
+    { project: string; tasks: Set<string>; hours: number; entries: number }
+  >()
+
+  for (const log of logs) {
+    const current = grouped.get(log.projectId) ?? {
+      project: log.projectName,
+      tasks: new Set<string>(),
+      hours: 0,
+      entries: 0,
+    }
+    current.tasks.add(log.taskId)
+    current.hours += log.hours
+    current.entries += 1
+    grouped.set(log.projectId, current)
+  }
+
+  const columns: ReportColumn[] = [
+    { key: 'project', label: 'Project', align: 'left' },
+    { key: 'tasks', label: 'Tasks Worked', align: 'right' },
+    { key: 'entries', label: 'Time Entries', align: 'right' },
+    { key: 'hours', label: 'Total Hours', align: 'right' },
+  ]
+
+  const allRows: ReportRow[] = Array.from(grouped.values()).map((row) => ({
+    project: row.project,
+    tasks: row.tasks.size,
+    entries: row.entries,
+    hours: row.hours,
+  }))
+
+  return buildReportData('project', 'Project Report', filters, columns, allRows, page, perPage)
+}
+
+function generateTaskReport(
+  filters: ReportFilter,
+  page?: number,
+  perPage?: number,
+): ReportData {
+  let tasks = getTasksForReport()
+
+  if (filters.projectId) {
+    tasks = tasks.filter((task) => task.projectId === filters.projectId)
+  }
+  if (filters.employeeId) {
+    tasks = tasks.filter((task) => task.assignee?.id === filters.employeeId)
+  }
+  if (filters.status) {
+    tasks = tasks.filter((task) => task.status === filters.status)
+  }
+
+  const columns: ReportColumn[] = [
+    { key: 'task', label: 'Task', align: 'left' },
+    { key: 'project', label: 'Project', align: 'left' },
+    { key: 'assignee', label: 'Assignee', align: 'left' },
+    { key: 'status', label: 'Status', align: 'left' },
+    { key: 'dueDate', label: 'Due Date', align: 'left' },
+    { key: 'hours', label: 'Logged Hours', align: 'right' },
+  ]
+
+  const allRows: ReportRow[] = tasks.map((task) => ({
+    task: task.title,
+    project: task.projectName,
+    assignee: task.assignee?.name ?? 'Unassigned',
+    status: TASK_STATUS_LABELS[task.status as TaskStatus],
+    dueDate: task.dueDate ?? '—',
+    hours: task.loggedHours,
+  }))
+
+  return buildReportData('task', 'Task Report', filters, columns, allRows, page, perPage)
+}
+
 export async function getReportTypes(): Promise<ReportMeta[]> {
   await delay(200)
   return REPORT_TYPES.map((r) => ReportMetaSchema.parse(r))
@@ -487,8 +675,6 @@ export async function generateReport(params: {
   perPage?: number
 }): Promise<ReportData> {
   await delay()
-  if (params.type === 'expense') throw new Error('Expense report is not available yet')
-
   switch (params.type) {
     case 'employee':
       return generateEmployeeReport(params.filters, params.page, params.perPage)
@@ -500,8 +686,16 @@ export async function generateReport(params: {
       return generatePayslipReport(params.filters, params.page, params.perPage)
     case 'payment':
       return generatePaymentReport(params.filters, params.page, params.perPage)
+    case 'expense':
+      return generateExpenseReport(params.filters, params.page, params.perPage)
     case 'user_activity':
       return generateUserActivityReport(params.filters, params.page, params.perPage)
+    case 'daily':
+      return generateDailyReport(params.filters, params.page, params.perPage)
+    case 'project':
+      return generateProjectReport(params.filters, params.page, params.perPage)
+    case 'task':
+      return generateTaskReport(params.filters, params.page, params.perPage)
     default:
       throw new Error('Unknown report type')
   }
@@ -512,11 +706,13 @@ export async function exportReport(params: {
   filters: ReportFilter
 }): Promise<Blob> {
   await delay(500)
-  if (params.type === 'expense') throw new Error('Expense report is not available yet')
-
   const report = await generateReport({ type: params.type, filters: params.filters, page: 1, perPage: 100000 })
   const csv = `\uFEFF${rowsToCsv(report.columns, report.rows)}`
   return new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+}
+
+export function getProjectReportOptions() {
+  return getProjectOptions()
 }
 
 export function getReportDownloadFilename(type: ReportType): string {

@@ -4,9 +4,13 @@ import {
   Briefcase,
   Building2,
   CalendarDays,
+  CheckSquare,
   Clock,
   CreditCard,
+  FolderKanban,
+  Landmark,
   LayoutDashboard,
+  Network,
   PiggyBank,
   Receipt,
   Settings,
@@ -18,12 +22,16 @@ import {
   Wallet,
 } from 'lucide-react'
 import type { UserRole } from '../types/auth.types'
+import type { PermissionModule } from '../types/permission.types'
+import { getNavPermissionForHref } from './permission-nav.config'
 
 export interface NavItemConfig {
   label: string
   href: string
   icon: LucideIcon
   roles: UserRole[]
+  /** When true, only active on exact path match (not child routes). */
+  end?: boolean
 }
 
 export interface NavSectionConfig {
@@ -40,6 +48,7 @@ export const NAV_SECTIONS: NavSectionConfig[] = [
         href: '/dashboard',
         icon: LayoutDashboard,
         roles: ['super_admin', 'hr_admin', 'employee'],
+        end: true,
       },
     ],
   },
@@ -71,6 +80,12 @@ export const NAV_SECTIONS: NavSectionConfig[] = [
         icon: CalendarDays,
         roles: ['super_admin', 'hr_admin', 'employee'],
       },
+      {
+        label: 'Org Chart',
+        href: '/org-chart',
+        icon: Network,
+        roles: ['super_admin', 'hr_admin', 'employee'],
+      },
     ],
   },
   {
@@ -95,6 +110,12 @@ export const NAV_SECTIONS: NavSectionConfig[] = [
         roles: ['super_admin', 'hr_admin', 'employee'],
       },
       {
+        label: 'Bank Accounts',
+        href: '/payroll/bank-accounts',
+        icon: Landmark,
+        roles: ['super_admin', 'hr_admin', 'employee'],
+      },
+      {
         label: 'Provident Fund',
         href: '/payroll/provident',
         icon: PiggyBank,
@@ -116,6 +137,23 @@ export const NAV_SECTIONS: NavSectionConfig[] = [
         label: 'Referrals',
         href: '/recruitment/referrals',
         icon: UserPlus,
+        roles: ['super_admin', 'hr_admin', 'employee'],
+      },
+    ],
+  },
+  {
+    label: 'PROJECTS',
+    items: [
+      {
+        label: 'Projects',
+        href: '/projects',
+        icon: FolderKanban,
+        roles: ['super_admin', 'hr_admin', 'employee'],
+      },
+      {
+        label: 'Tasks',
+        href: '/tasks',
+        icon: CheckSquare,
         roles: ['super_admin', 'hr_admin', 'employee'],
       },
     ],
@@ -146,20 +184,26 @@ export const NAV_SECTIONS: NavSectionConfig[] = [
     label: 'SETTINGS',
     items: [
       {
+        label: 'Companies',
+        href: '/settings/companies',
+        icon: Building2,
+        roles: ['super_admin'],
+      },
+      {
         label: 'Company Settings',
-        href: '/settings',
+        href: '/settings/company',
         icon: Settings,
         roles: ['super_admin'],
       },
       {
         label: 'Roles & Permissions',
-        href: '/settings',
+        href: '/settings/roles',
         icon: Shield,
         roles: ['super_admin'],
       },
       {
         label: 'Users',
-        href: '/settings',
+        href: '/settings/users',
         icon: Users,
         roles: ['super_admin'],
       },
@@ -167,9 +211,20 @@ export const NAV_SECTIONS: NavSectionConfig[] = [
   },
 ]
 
-export function getNavSectionsForRole(role: UserRole): NavSectionConfig[] {
+export function getNavSectionsForRole(
+  role: UserRole,
+  canView: (module: PermissionModule) => boolean = () => true,
+): NavSectionConfig[] {
   return NAV_SECTIONS.map((section) => ({
     ...section,
-    items: section.items.filter((item) => item.roles.includes(role)),
+    items: section.items.filter((item) => {
+      if (!item.roles.includes(role)) return false
+
+      const permission = getNavPermissionForHref(item.href)
+      if (!permission) return true
+
+      if (role === 'super_admin') return true
+      return canView(permission.module)
+    }),
   })).filter((section) => section.items.length > 0)
 }

@@ -7,62 +7,13 @@ import {
   type RegisterInput,
   type ResetPasswordInput,
 } from '../types/auth.types'
+import { createCompanyFromRegistration } from './companies.api'
+import { findAuthUserByEmail, createUserFromRegistration, recordUserLogin } from './users.api'
+import { DEFAULT_COMPANY_ID } from '../utils/company-context.utils'
+import { assertLoginAllowedForTenant } from '../utils/auth-tenant.utils'
+import { useUIStore } from '../store/uiStore'
 
 const MOCK_DELAY_MS = 600
-
-const MOCK_USERS: Array<{
-  email: string
-  password: string
-  user: AuthResponse['user']
-  requiresTwoFactor?: boolean
-}> = [
-  {
-    email: 'admin@smarthr.com',
-    password: 'password123',
-    user: {
-      id: 'usr-admin-1',
-      name: 'HR Admin',
-      email: 'admin@smarthr.com',
-      role: 'hr_admin',
-      companyId: 'co-1',
-    },
-  },
-  {
-    email: 'super@smarthr.com',
-    password: 'password123',
-    user: {
-      id: 'usr-super-1',
-      name: 'Super Admin',
-      email: 'super@smarthr.com',
-      role: 'super_admin',
-      companyId: 'co-1',
-    },
-  },
-  {
-    email: 'employee@smarthr.com',
-    password: 'password123',
-    user: {
-      id: 'usr-employee-1',
-      name: 'Jane Employee',
-      email: 'employee@smarthr.com',
-      role: 'employee',
-      companyId: 'co-1',
-    },
-  },
-  {
-    email: '2fa@smarthr.com',
-    password: 'password123',
-    requiresTwoFactor: true,
-    user: {
-      id: 'usr-2fa-1',
-      name: 'Two Factor User',
-      email: '2fa@smarthr.com',
-      role: 'hr_admin',
-      companyId: 'co-1',
-    },
-  },
-]
-
 const MOCK_TWO_FACTOR_CODE = '123456'
 const pendingTwoFactorSessions = new Map<string, AuthResponse['user']>()
 
@@ -77,17 +28,27 @@ function createToken(userId: string) {
 export async function login(data: LoginInput): Promise<LoginResult> {
   await delay()
 
-  const account = MOCK_USERS.find(
-    (user) => user.email.toLowerCase() === data.email.toLowerCase(),
-  )
+  const account = findAuthUserByEmail(data.email)
 
   if (!account || account.password !== data.password) {
     throw new Error('Invalid email or password')
   }
 
+  if (account.status === 'inactive') {
+    throw new Error('This account has been deactivated')
+  }
+
+  assertLoginAllowedForTenant(account.user)
+
   if (account.requiresTwoFactor) {
-    pendingTwoFactorSessions.set(account.email.toLowerCase(), account.user)
-    return { requiresTwoFactor: true, email: account.email }
+    pendingTwoFactorSessions.set(account.user.email.toLowerCase(), account.user)
+    return { requiresTwoFactor: true, email: account.user.email }
+  }
+
+  await recordUserLogin(account.user.id)
+
+  if (account.user.role === 'super_admin') {
+    useUIStore.getState().setActiveCompanyId(account.user.companyId ?? DEFAULT_COMPANY_ID)
   }
 
   return AuthResponseSchema.parse({
@@ -96,19 +57,30 @@ export async function login(data: LoginInput): Promise<LoginResult> {
   })
 }
 
-export async function register(data: RegisterInput): Promise<{ message: string }> {
+export async function register(
+  data: RegisterInput,
+): Promise<{ message: string; companySlug: string; companyName: string }> {
   await delay()
 
-  const exists = MOCK_USERS.some(
-    (user) => user.email.toLowerCase() === data.email.toLowerCase(),
-  )
+  const exists = findAuthUserByEmail(data.email)
 
   if (exists) {
     throw new Error('An account with this email already exists')
   }
 
+  const company = await createCompanyFromRegistration(data.companyName)
+  await createUserFromRegistration({
+    firstName: data.firstName,
+    lastName: data.lastName,
+    email: data.email,
+    password: data.password,
+    companyId: company.id,
+  })
+
   return {
     message: `Account created for ${data.firstName} ${data.lastName}. Please verify your email.`,
+    companySlug: company.slug,
+    companyName: company.name,
   }
 }
 
@@ -156,6 +128,14 @@ export async function verifyTwoFactor(code: string): Promise<AuthResponse> {
 
   const [email, user] = session
   pendingTwoFactorSessions.delete(email)
+
+  assertLoginAllowedForTenant(user)
+
+  await recordUserLogin(user.id)
+
+  if (user.role === 'super_admin') {
+    useUIStore.getState().setActiveCompanyId(user.companyId ?? DEFAULT_COMPANY_ID)
+  }
 
   return AuthResponseSchema.parse({
     token: createToken(user.id),

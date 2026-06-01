@@ -1,13 +1,18 @@
 import {
+  departmentStore,
+  findDepartment,
+} from './org-data'
+import { getEmployeeDepartmentCounts, getEmployeePickerOptions } from './employees.api'
+import {
   DepartmentSchema,
   type Department,
   type DepartmentFormInput,
 } from '../types/department.types'
 import {
-  departmentStore,
-  findDepartment,
-} from './org-data'
-import { getEmployeeDepartmentCounts, getEmployeePickerOptions } from './employees.api'
+  assertCompanyAccess,
+  filterByCompany,
+  getActiveCompanyIdSync,
+} from '../utils/company-context.utils'
 
 const MOCK_DELAY_MS = 400
 let nextDeptId = departmentStore.length + 1
@@ -28,7 +33,7 @@ function withCounts(departments: Department[]): Department[] {
 
 export async function getDepartments(params?: { search?: string }): Promise<Department[]> {
   await delay()
-  let result = withCounts([...departmentStore])
+  let result = withCounts(filterByCompany(departmentStore))
 
   if (params?.search) {
     const q = params.search.toLowerCase()
@@ -45,12 +50,14 @@ export async function getDepartments(params?: { search?: string }): Promise<Depa
 export async function createDepartment(data: DepartmentFormInput): Promise<Department> {
   await delay()
 
+  const companyId = getActiveCompanyIdSync()
   const head = data.headEmployeeId
     ? getEmployeePickerOptions().find((e) => e.id === data.headEmployeeId)
     : undefined
 
   const department: Department = DepartmentSchema.parse({
     id: `dept-${nextDeptId++}`,
+    companyId,
     name: data.name,
     description: data.description,
     headEmployee: head
@@ -72,6 +79,7 @@ export async function updateDepartment(
 
   const index = departmentStore.findIndex((d) => d.id === id)
   if (index === -1) throw new Error('Department not found')
+  assertCompanyAccess(departmentStore[index].companyId)
 
   const head = data.headEmployeeId
     ? getEmployeePickerOptions().find((e) => e.id === data.headEmployeeId)
@@ -93,12 +101,14 @@ export async function updateDepartment(
 
 export async function deleteDepartment(id: string): Promise<void> {
   await delay()
+  const index = departmentStore.findIndex((d) => d.id === id)
+  if (index === -1) throw new Error('Department not found')
+  assertCompanyAccess(departmentStore[index].companyId)
+
   const counts = getEmployeeDepartmentCounts()
   if ((counts[id] ?? 0) > 0) {
     throw new Error('Cannot delete department with assigned employees')
   }
-  const index = departmentStore.findIndex((d) => d.id === id)
-  if (index === -1) throw new Error('Department not found')
   departmentStore.splice(index, 1)
 }
 

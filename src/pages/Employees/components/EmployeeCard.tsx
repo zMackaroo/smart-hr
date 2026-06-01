@@ -1,5 +1,6 @@
 import { Mail, Pencil, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { PermissionGate } from '../../../components/shared/PermissionGate'
 import { Badge } from '../../../components/ui/Badge'
 import { UserAvatar } from '../../../components/layout/UserAvatar'
 import { StatusBadge } from '../../../components/shared/StatusBadge'
@@ -31,22 +32,26 @@ export function EmployeeCard({ employee, onEdit, onDelete }: EmployeeCardProps) 
         >
           <Mail className="h-4 w-4" strokeWidth={1.5} />
         </a>
-        <button
-          type="button"
-          onClick={() => onEdit(employee)}
-          className="rounded-md p-2 text-secondary transition-colors hover:bg-surface-alt hover:text-primary"
-          aria-label={`Edit ${employee.fullName}`}
-        >
-          <Pencil className="h-4 w-4" strokeWidth={1.5} />
-        </button>
-        <button
-          type="button"
-          onClick={() => onDelete(employee)}
-          className="rounded-md p-2 text-secondary transition-colors hover:bg-surface-alt hover:text-error"
-          aria-label={`Delete ${employee.fullName}`}
-        >
-          <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-        </button>
+        <PermissionGate module="employees" action="edit">
+          <button
+            type="button"
+            onClick={() => onEdit(employee)}
+            className="rounded-md p-2 text-secondary transition-colors hover:bg-surface-alt hover:text-primary"
+            aria-label={`Edit ${employee.fullName}`}
+          >
+            <Pencil className="h-4 w-4" strokeWidth={1.5} />
+          </button>
+        </PermissionGate>
+        <PermissionGate module="employees" action="delete">
+          <button
+            type="button"
+            onClick={() => onDelete(employee)}
+            className="rounded-md p-2 text-secondary transition-colors hover:bg-surface-alt hover:text-error"
+            aria-label={`Delete ${employee.fullName}`}
+          >
+            <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+          </button>
+        </PermissionGate>
         <Link
           to={`/employees/${employee.id}`}
           className="ml-1 text-xs font-medium text-accent hover:text-accent-dark"

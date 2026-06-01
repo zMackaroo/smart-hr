@@ -1,4 +1,5 @@
 import { Check, Search, X } from 'lucide-react'
+import { PermissionGate } from '../../../components/shared/PermissionGate'
 import { Button } from '../../../components/ui/Button'
 import { Modal } from '../../../components/ui/Modal'
 import { EmptyState } from '../../../components/shared/EmptyState'
@@ -131,24 +132,26 @@ export function AdminReferralsView() {
                     </td>
                     <td className="px-5 py-3.5">
                       {(referral.status === 'pending' || referral.status === 'reviewed') && (
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => vm.openAcceptConfirm(referral)}
-                            className="rounded-md p-2 text-success transition-colors hover:bg-[var(--state-success-bg)]"
-                            aria-label="Accept referral"
-                          >
-                            <Check className="h-4 w-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => vm.openRejectConfirm(referral)}
-                            className="rounded-md p-2 text-error transition-colors hover:bg-[var(--state-error-bg)]"
-                            aria-label="Reject referral"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </div>
+                        <PermissionGate module="recruitment" action="approve">
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => vm.openAcceptConfirm(referral)}
+                              className="rounded-md p-2 text-success transition-colors hover:bg-[var(--state-success-bg)]"
+                              aria-label="Accept referral"
+                            >
+                              <Check className="h-4 w-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => vm.openRejectConfirm(referral)}
+                              className="rounded-md p-2 text-error transition-colors hover:bg-[var(--state-error-bg)]"
+                              aria-label="Reject referral"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </PermissionGate>
                       )}
                     </td>
                   </tr>

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { DEFAULT_CURRENCY } from '../config/currency.config'
 
 export type PayFrequency = 'monthly' | 'bi_weekly' | 'weekly'
 export type PayslipStatus = 'draft' | 'processed' | 'paid'
@@ -14,6 +15,7 @@ export type SalaryComponent = z.infer<typeof SalaryComponentSchema>
 
 export const EmployeeSalarySchema = z.object({
   id: z.string(),
+  companyId: z.string(),
   employee: z.object({
     id: z.string(),
     employeeId: z.string(),
@@ -31,7 +33,7 @@ export const EmployeeSalarySchema = z.object({
   payFrequency: z.enum(['monthly', 'bi_weekly', 'weekly']),
   effectiveFrom: z.string(),
   bankAccountLast4: z.string().optional(),
-  currency: z.string().default('USD'),
+  currency: z.string().default(DEFAULT_CURRENCY),
   updatedAt: z.string(),
 })
 export type EmployeeSalary = z.infer<typeof EmployeeSalarySchema>
@@ -41,11 +43,7 @@ export const SalaryFormSchema = z.object({
   baseSalary: z.number().min(0, 'Base salary must be positive'),
   payFrequency: z.enum(['monthly', 'bi_weekly', 'weekly']),
   effectiveFrom: z.string().min(1, 'Effective date is required'),
-  bankAccountLast4: z
-    .string()
-    .length(4, 'Must be 4 digits')
-    .optional()
-    .or(z.literal('')),
+  bankAccountLast4: z.string().optional(),
   components: z.array(
     z.object({
       label: z.string().min(1, 'Label is required'),
@@ -58,6 +56,7 @@ export type SalaryFormInput = z.infer<typeof SalaryFormSchema>
 
 export const PayslipSchema = z.object({
   id: z.string(),
+  companyId: z.string(),
   employee: z.object({
     id: z.string(),
     employeeId: z.string(),
@@ -87,6 +86,7 @@ export type Payslip = z.infer<typeof PayslipSchema>
 
 export const ProvidentFundRecordSchema = z.object({
   id: z.string(),
+  companyId: z.string(),
   employee: z.object({
     id: z.string(),
     employeeId: z.string(),

@@ -1,4 +1,5 @@
 import { Briefcase, Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { PermissionGate } from '../../components/shared/PermissionGate'
 import { Button } from '../../components/ui/Button'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { EmptyState } from '../../components/shared/EmptyState'
@@ -16,10 +17,12 @@ export function DesignationsPage() {
         title="Designations"
         breadcrumbs={[{ label: 'HR' }, { label: 'Designations' }]}
         actions={
-          <Button onClick={vm.openAddModal}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Designation
-          </Button>
+          <PermissionGate module="departments" action="create">
+            <Button onClick={vm.openAddModal}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Designation
+            </Button>
+          </PermissionGate>
         }
       />
 
@@ -68,10 +71,12 @@ export function DesignationsPage() {
           icon={Briefcase}
           action={
             !vm.searchQuery && !vm.selectedDepartmentFilter ? (
-              <Button onClick={vm.openAddModal}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Designation
-              </Button>
+              <PermissionGate module="departments" action="create">
+                <Button onClick={vm.openAddModal}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Designation
+                </Button>
+              </PermissionGate>
             ) : undefined
           }
         />
@@ -107,22 +112,26 @@ export function DesignationsPage() {
                   </td>
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => vm.openEditModal(des)}
-                        className="rounded-md p-2 text-secondary transition-colors hover:bg-surface-alt hover:text-primary"
-                        aria-label={`Edit ${des.name}`}
-                      >
-                        <Pencil className="h-4 w-4" strokeWidth={1.5} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => vm.openDeleteModal(des)}
-                        className="rounded-md p-2 text-secondary transition-colors hover:bg-surface-alt hover:text-error"
-                        aria-label={`Delete ${des.name}`}
-                      >
-                        <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-                      </button>
+                      <PermissionGate module="departments" action="edit">
+                        <button
+                          type="button"
+                          onClick={() => vm.openEditModal(des)}
+                          className="rounded-md p-2 text-secondary transition-colors hover:bg-surface-alt hover:text-primary"
+                          aria-label={`Edit ${des.name}`}
+                        >
+                          <Pencil className="h-4 w-4" strokeWidth={1.5} />
+                        </button>
+                      </PermissionGate>
+                      <PermissionGate module="departments" action="delete">
+                        <button
+                          type="button"
+                          onClick={() => vm.openDeleteModal(des)}
+                          className="rounded-md p-2 text-secondary transition-colors hover:bg-surface-alt hover:text-error"
+                          aria-label={`Delete ${des.name}`}
+                        >
+                          <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                        </button>
+                      </PermissionGate>
                     </div>
                   </td>
                 </tr>

@@ -44,17 +44,20 @@ export function ReportsPage() {
         filters={vm.filters}
         departments={vm.departments}
         employees={vm.employees}
+        projects={vm.projects}
         page={vm.page}
         totalPages={vm.totalPages}
         totalRows={totalRows}
         start={start}
         end={end}
         isExporting={vm.isExporting}
+        isExportingPdf={vm.isExportingPdf}
         onClose={vm.closePreview}
         onFiltersChange={vm.setFilters}
         onApplyFilters={vm.onApplyFilters}
         onPageChange={vm.onPageChange}
         onExport={vm.onExport}
+        onExportPdf={vm.onExportPdf}
       />
     </>
   )

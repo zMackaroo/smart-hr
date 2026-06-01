@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Download, Pencil } from 'lucide-react'
+import { PermissionGate } from '../../../components/shared/PermissionGate'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { UserAvatar } from '../../../components/layout/UserAvatar'
@@ -35,10 +36,12 @@ export function AdminAttendanceView() {
           onMonthChange={vm.setMonth}
           onYearChange={vm.setYear}
         />
-        <Button variant="outline" onClick={vm.onExport} disabled={vm.isExporting}>
-          <Download className="mr-2 h-4 w-4" />
-          {vm.isExporting ? 'Exporting...' : 'Export CSV'}
-        </Button>
+        <PermissionGate module="attendance" action="edit">
+          <Button variant="outline" onClick={vm.onExport} disabled={vm.isExporting}>
+            <Download className="mr-2 h-4 w-4" />
+            {vm.isExporting ? 'Exporting...' : 'Export CSV'}
+          </Button>
+        </PermissionGate>
       </div>
 
       <AttendanceSummaryCards summary={vm.summary} isLoading={vm.isLoading} />
@@ -116,14 +119,16 @@ export function AdminAttendanceView() {
                     <AttendanceStatusBadge status={record.status} />
                   </td>
                   <td className="px-5 py-3.5">
-                    <button
-                      type="button"
-                      onClick={() => vm.openEditModal(record)}
-                      className="rounded-md p-2 text-secondary transition-colors hover:bg-surface-alt hover:text-primary"
-                      aria-label={`Edit attendance for ${record.employeeName}`}
-                    >
-                      <Pencil className="h-4 w-4" strokeWidth={1.5} />
-                    </button>
+                    <PermissionGate module="attendance" action="edit">
+                      <button
+                        type="button"
+                        onClick={() => vm.openEditModal(record)}
+                        className="rounded-md p-2 text-secondary transition-colors hover:bg-surface-alt hover:text-primary"
+                        aria-label={`Edit attendance for ${record.employeeName}`}
+                      >
+                        <Pencil className="h-4 w-4" strokeWidth={1.5} />
+                      </button>
+                    </PermissionGate>
                   </td>
                 </tr>
               ))}

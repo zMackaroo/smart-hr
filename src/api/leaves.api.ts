@@ -17,12 +17,14 @@ import {
   type LeaveTypeFormInput,
 } from '../types/leave.types'
 import { getAllEmployeesForAttendance } from './employees.api'
+import { filterByCompany } from '../utils/company-context.utils'
 
 const MOCK_DELAY_MS = 350
 
 let leaveTypeStore: LeaveType[] = [
   {
     id: 'lt-1',
+    companyId: 'co-1',
     name: 'Annual Leave',
     color: '#00D68F',
     defaultDays: 18,
@@ -32,6 +34,7 @@ let leaveTypeStore: LeaveType[] = [
   },
   {
     id: 'lt-2',
+    companyId: 'co-1',
     name: 'Sick Leave',
     color: '#FF4C61',
     defaultDays: 10,
@@ -41,6 +44,7 @@ let leaveTypeStore: LeaveType[] = [
   },
   {
     id: 'lt-3',
+    companyId: 'co-1',
     name: 'Casual Leave',
     color: '#2196F3',
     defaultDays: 8,
@@ -50,6 +54,7 @@ let leaveTypeStore: LeaveType[] = [
   },
   {
     id: 'lt-4',
+    companyId: 'co-1',
     name: 'Maternity Leave',
     color: '#FF902F',
     defaultDays: 90,
@@ -59,6 +64,7 @@ let leaveTypeStore: LeaveType[] = [
   },
   {
     id: 'lt-5',
+    companyId: 'co-1',
     name: 'Unpaid Leave',
     color: '#6E82A0',
     defaultDays: 0,
@@ -74,7 +80,7 @@ function createSeedRequests(): LeaveRequest[] {
   const sick = leaveTypeStore[1]
   const casual = leaveTypeStore[2]
 
-  const seeds: Array<Omit<LeaveRequest, 'id'>> = [
+  const seeds: Array<Omit<LeaveRequest, 'id' | 'companyId'>> = [
     {
       employee: {
         id: employees[1]?.id ?? 'emp-2',
@@ -155,7 +161,7 @@ function createSeedRequests(): LeaveRequest[] {
   ]
 
   return seeds.map((seed, index) =>
-    LeaveRequestSchema.parse({ ...seed, id: `lr-${index + 1}` }),
+    LeaveRequestSchema.parse({ ...seed, companyId: 'co-1', id: `lr-${index + 1}` }),
   )
 }
 
@@ -234,7 +240,7 @@ function computeBalance(employeeId: string, leaveType: LeaveType): LeaveBalance 
 
 export async function getLeaveTypes(): Promise<LeaveType[]> {
   await delay()
-  return [...leaveTypeStore]
+  return filterByCompany([...leaveTypeStore])
 }
 
 export async function createLeaveType(data: LeaveTypeFormInput): Promise<LeaveType> {
@@ -282,7 +288,7 @@ export async function getLeaveRequests(params: {
   const employees = getAllEmployeesForAttendance()
   const deptMap = new Map(employees.map((e) => [e.id, e.departmentId]))
 
-  let filtered = [...leaveRequestStore]
+  let filtered = filterByCompany([...leaveRequestStore])
 
   if (params.status) {
     filtered = filtered.filter((r) => r.status === params.status)

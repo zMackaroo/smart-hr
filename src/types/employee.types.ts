@@ -4,6 +4,7 @@ export type EmployeeStatus = 'active' | 'inactive' | 'on_leave' | 'terminated'
 
 export const EmployeeSchema = z.object({
   id: z.string(),
+  companyId: z.string(),
   employeeId: z.string(),
   firstName: z.string(),
   lastName: z.string(),

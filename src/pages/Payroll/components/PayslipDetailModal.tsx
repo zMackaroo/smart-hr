@@ -36,7 +36,7 @@ export function PayslipDetailModal({
             Close
           </Button>
           <Button variant="outline" onClick={() => onDownload(payslip.id)}>
-            Download
+            Download PDF
           </Button>
           {isAdmin && payslip.status === 'processed' && onMarkPaid && (
             <Button onClick={() => onMarkPaid(payslip.id)} disabled={isSubmitting}>

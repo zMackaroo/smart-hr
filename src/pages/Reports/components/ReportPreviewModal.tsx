@@ -1,4 +1,5 @@
 import { Button } from '../../../components/ui/Button'
+import { PermissionGate } from '../../../components/shared/PermissionGate'
 import { Modal } from '../../../components/ui/Modal'
 import { formatDate } from '../../../utils/date.utils'
 import { EmployeePagination } from '../../Employees/components/EmployeePagination'
@@ -16,17 +17,20 @@ interface ReportPreviewModalProps {
   filters: ReportFilter
   departments: Department[]
   employees: Array<{ id: string; name: string }>
+  projects: Array<{ id: string; name: string }>
   page: number
   totalPages: number
   totalRows: number
   start: number
   end: number
   isExporting: boolean
+  isExportingPdf: boolean
   onClose: () => void
   onFiltersChange: (filters: ReportFilter) => void
   onApplyFilters: () => void
   onPageChange: (page: number) => void
   onExport: () => void
+  onExportPdf: () => void
 }
 
 export function ReportPreviewModal({
@@ -37,17 +41,20 @@ export function ReportPreviewModal({
   filters,
   departments,
   employees,
+  projects,
   page,
   totalPages,
   totalRows,
   start,
   end,
   isExporting,
+  isExportingPdf,
   onClose,
   onFiltersChange,
   onApplyFilters,
   onPageChange,
   onExport,
+  onExportPdf,
 }: ReportPreviewModalProps) {
   if (!reportType) return null
 
@@ -70,13 +77,24 @@ export function ReportPreviewModal({
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
-          <Button
-            variant="outline"
-            onClick={onExport}
-            disabled={isExporting || isGenerating || !hasData}
-          >
-            {isExporting ? 'Exporting...' : 'Export CSV'}
-          </Button>
+          <PermissionGate module="reports" action="view">
+            <Button
+              variant="outline"
+              onClick={onExportPdf}
+              disabled={isExportingPdf || isExporting || isGenerating || !hasData}
+            >
+              {isExportingPdf ? 'Exporting PDF...' : 'Export PDF'}
+            </Button>
+          </PermissionGate>
+          <PermissionGate module="reports" action="view">
+            <Button
+              variant="outline"
+              onClick={onExport}
+              disabled={isExporting || isExportingPdf || isGenerating || !hasData}
+            >
+              {isExporting ? 'Exporting...' : 'Export CSV'}
+            </Button>
+          </PermissionGate>
         </div>
       }
     >
@@ -86,6 +104,7 @@ export function ReportPreviewModal({
           filters={filters}
           departments={departments}
           employees={employees}
+          projects={projects}
           isLoading={isGenerating}
           onChange={onFiltersChange}
           onApply={onApplyFilters}

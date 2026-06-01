@@ -1,14 +1,19 @@
 import {
-  DesignationSchema,
-  type Designation,
-  type DesignationFormInput,
-} from '../types/designation.types'
-import {
   designationStore,
   findDepartment,
   findDesignation,
 } from './org-data'
 import { getEmployeeDesignationCounts } from './employees.api'
+import {
+  DesignationSchema,
+  type Designation,
+  type DesignationFormInput,
+} from '../types/designation.types'
+import {
+  assertCompanyAccess,
+  filterByCompany,
+  getActiveCompanyIdSync,
+} from '../utils/company-context.utils'
 
 const MOCK_DELAY_MS = 400
 let nextDesId = designationStore.length + 1
@@ -32,7 +37,7 @@ export async function getDesignations(params?: {
   departmentId?: string
 }): Promise<Designation[]> {
   await delay()
-  let result = withCounts([...designationStore])
+  let result = withCounts(filterByCompany(designationStore))
 
   if (params?.search) {
     const q = params.search.toLowerCase()
@@ -49,10 +54,12 @@ export async function getDesignations(params?: {
 export async function createDesignation(data: DesignationFormInput): Promise<Designation> {
   await delay()
 
+  const companyId = getActiveCompanyIdSync()
   const department = data.departmentId ? findDepartment(data.departmentId) : undefined
 
   const designation: Designation = DesignationSchema.parse({
     id: `des-${nextDesId++}`,
+    companyId,
     name: data.name,
     department: department ? { id: department.id, name: department.name } : undefined,
     employeeCount: 0,
@@ -71,6 +78,7 @@ export async function updateDesignation(
 
   const index = designationStore.findIndex((d) => d.id === id)
   if (index === -1) throw new Error('Designation not found')
+  assertCompanyAccess(designationStore[index].companyId)
 
   const department = data.departmentId ? findDepartment(data.departmentId) : undefined
 
@@ -89,12 +97,14 @@ export async function updateDesignation(
 
 export async function deleteDesignation(id: string): Promise<void> {
   await delay()
+  const index = designationStore.findIndex((d) => d.id === id)
+  if (index === -1) throw new Error('Designation not found')
+  assertCompanyAccess(designationStore[index].companyId)
+
   const counts = getEmployeeDesignationCounts()
   if ((counts[id] ?? 0) > 0) {
     throw new Error('Cannot delete designation with assigned employees')
   }
-  const index = designationStore.findIndex((d) => d.id === id)
-  if (index === -1) throw new Error('Designation not found')
   designationStore.splice(index, 1)
 }
 

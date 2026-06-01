@@ -3,11 +3,20 @@ import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { NotificationDropdown } from './NotificationDropdown'
 import { UserDropdown } from './UserDropdown'
+import { CompanySwitcher } from './CompanySwitcher'
 import { useTopbarViewModel } from './Topbar.viewmodel'
 
 export function Topbar() {
-  const { user, toggleSidebar, breadcrumbs, unreadCount, showSettings, onLogout } =
-    useTopbarViewModel()
+  const {
+    user,
+    toggleSidebar,
+    breadcrumbs,
+    unreadCount,
+    showSettings,
+    showCompanySwitcher,
+    tenantBadge,
+    onLogout,
+  } = useTopbarViewModel()
   const [searchFocused, setSearchFocused] = useState(false)
 
   return (
@@ -38,6 +47,12 @@ export function Topbar() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          {tenantBadge && (
+            <span className="hidden rounded-md bg-surface-alt px-2.5 py-1 text-xs font-medium text-secondary sm:inline-flex">
+              {tenantBadge}
+            </span>
+          )}
+          {showCompanySwitcher && <CompanySwitcher />}
           <div className="relative hidden sm:block">
             <Search
               className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"

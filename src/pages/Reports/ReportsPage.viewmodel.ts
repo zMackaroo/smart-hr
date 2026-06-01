@@ -1,12 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { getDepartments } from '../../api/departments.api'
-import {
-  exportReport,
-  generateReport,
-  getReportDownloadFilename,
-  getReportTypes,
-} from '../../api/reports.api'
+import { getProjectReportOptions, exportReport, generateReport, getReportDownloadFilename, getReportTypes } from '../../api/reports.api'
 import { getEmployeePickerOptions } from '../../api/employees.api'
 import { useNotificationStore } from '../../store/notificationStore'
 import {
@@ -14,6 +9,12 @@ import {
   type ReportFilter,
   type ReportType,
 } from '../../types/report.types'
+import { downloadBlob } from '../../utils/pdf.utils'
+import {
+  buildReportFilterSummary,
+  generateReportPdf,
+  getReportPdfFilename,
+} from '../../utils/report-pdf.utils'
 
 export function useReportsPageViewModel() {
   const queryClient = useQueryClient()
@@ -36,6 +37,7 @@ export function useReportsPageViewModel() {
   })
 
   const employees = getEmployeePickerOptions()
+  const projects = getProjectReportOptions()
 
   const { data: reportData, isLoading: isGenerating } = useQuery({
     queryKey: ['report-data', selectedReportType, appliedFilters, page],
@@ -66,6 +68,36 @@ export function useReportsPageViewModel() {
       addNotification('success', 'Report exported successfully')
     },
     onError: (error: Error) => addNotification('error', error.message),
+  })
+
+  const exportPdfMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedReportType) throw new Error('No report selected')
+
+      const report = await generateReport({
+        type: selectedReportType,
+        filters: appliedFilters,
+        page: 1,
+        perPage: 100000,
+      })
+
+      const filterSummary = buildReportFilterSummary(
+        appliedFilters,
+        departments,
+        employees,
+      )
+
+      return {
+        blob: generateReportPdf(report, { filterSummary }),
+        filename: getReportPdfFilename(report.type),
+      }
+    },
+    onSuccess: ({ blob, filename }) => {
+      downloadBlob(blob, filename)
+      addNotification('success', 'Report PDF exported successfully')
+    },
+    onError: (error: Error) =>
+      addNotification('error', error.message || 'Failed to generate report PDF'),
   })
 
   const openPreview = (type: ReportType) => {
@@ -107,8 +139,11 @@ export function useReportsPageViewModel() {
     totalPages,
     onPageChange: setPage,
     onExport: () => exportMutation.mutate(),
+    onExportPdf: () => exportPdfMutation.mutate(),
     isExporting: exportMutation.isPending,
+    isExportingPdf: exportPdfMutation.isPending,
     departments,
     employees,
+    projects,
   }
 }

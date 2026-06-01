@@ -1,4 +1,5 @@
 import { Check, Download, Eye, Search } from 'lucide-react'
+import { PermissionGate } from '../../../components/shared/PermissionGate'
 import { ConfirmDialog } from '../../../components/shared/ConfirmDialog'
 import { Button } from '../../../components/ui/Button'
 import { EmployeePagination } from '../../Employees/components/EmployeePagination'
@@ -28,13 +29,17 @@ export function AdminPayslipView() {
           onMonthChange={vm.setMonth}
           onYearChange={vm.setYear}
         />
-        <Button variant="outline" onClick={vm.openGenerateModal} disabled={vm.isGenerating}>
-          {vm.isGenerating ? 'Generating...' : 'Generate Payslips'}
-        </Button>
-        <Button variant="outline" onClick={vm.onExport} disabled={vm.isExporting}>
-          <Download className="mr-2 h-4 w-4" />
-          {vm.isExporting ? 'Exporting...' : 'Export CSV'}
-        </Button>
+        <PermissionGate module="payroll" action="edit">
+          <Button variant="outline" onClick={vm.openGenerateModal} disabled={vm.isGenerating}>
+            {vm.isGenerating ? 'Generating...' : 'Generate Payslips'}
+          </Button>
+        </PermissionGate>
+        <PermissionGate module="payroll" action="view">
+          <Button variant="outline" onClick={vm.onExport} disabled={vm.isExporting}>
+            <Download className="mr-2 h-4 w-4" />
+            {vm.isExporting ? 'Exporting...' : 'Export CSV'}
+          </Button>
+        </PermissionGate>
       </div>
 
       <div className="mb-6 flex flex-col gap-3 xl:flex-row xl:items-center">

@@ -61,7 +61,7 @@ export function UserDropdown({ user, showSettings, onLogout }: UserDropdownProps
           </Link>
           {showSettings && (
             <Link
-              to="/settings"
+              to="/settings/company"
               role="menuitem"
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-2 px-4 py-2.5 text-sm text-primary hover:bg-surface-alt"

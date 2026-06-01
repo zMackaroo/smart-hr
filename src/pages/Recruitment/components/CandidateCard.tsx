@@ -1,4 +1,5 @@
 import { ArrowRight, Eye, Pencil } from 'lucide-react'
+import { PermissionGate } from '../../../components/shared/PermissionGate'
 import { Button } from '../../../components/ui/Button'
 import { UserAvatar } from '../../../components/layout/UserAvatar'
 import { formatDate } from '../../../utils/date.utils'
@@ -65,15 +66,19 @@ export function CandidateCard({
           <Eye className="mr-1.5 h-3.5 w-3.5" />
           View
         </Button>
-        <Button variant="outline" size="sm" onClick={() => onEdit(candidate)}>
-          <Pencil className="mr-1.5 h-3.5 w-3.5" />
-          Edit
-        </Button>
-        {canAdvance && (
-          <Button variant="outline" size="sm" onClick={() => onAdvanceStatus(candidate.id)}>
-            <ArrowRight className="mr-1.5 h-3.5 w-3.5" />
-            Next Stage
+        <PermissionGate module="recruitment" action="edit">
+          <Button variant="outline" size="sm" onClick={() => onEdit(candidate)}>
+            <Pencil className="mr-1.5 h-3.5 w-3.5" />
+            Edit
           </Button>
+        </PermissionGate>
+        {canAdvance && (
+          <PermissionGate module="recruitment" action="approve">
+            <Button variant="outline" size="sm" onClick={() => onAdvanceStatus(candidate.id)}>
+              <ArrowRight className="mr-1.5 h-3.5 w-3.5" />
+              Next Stage
+            </Button>
+          </PermissionGate>
         )}
       </div>
     </div>

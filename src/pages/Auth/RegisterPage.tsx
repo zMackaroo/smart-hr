@@ -1,5 +1,6 @@
-import { Building2, Loader2, UserPlus } from 'lucide-react'
+import { Building2, CheckCircle2, ExternalLink, Loader2, UserPlus } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
+import { buildTenantLoginUrl, buildTenantWorkspaceUrl } from '../../utils/tenant.utils'
 import { AuthAlert } from './components/AuthAlert'
 import { AuthCard } from './components/AuthCard'
 import { AuthFooterLink } from './components/AuthFooterLink'
@@ -10,11 +11,47 @@ import { AuthPasswordField } from './components/AuthPasswordField'
 import { useRegisterViewModel } from './RegisterPage.viewmodel'
 
 export function RegisterPage() {
-  const { form, onSubmit, isLoading, error } = useRegisterViewModel()
+  const { form, onSubmit, isLoading, error, success } = useRegisterViewModel()
   const {
     register,
     formState: { errors },
   } = form
+
+  if (success) {
+    const workspaceUrl = buildTenantWorkspaceUrl(success.companySlug)
+    const loginUrl = buildTenantLoginUrl(success.companySlug)
+
+    return (
+      <AuthLayout>
+        <AuthCard>
+          <AuthHeader
+            icon={CheckCircle2}
+            title="Workspace ready"
+            subtitle={success.message}
+          />
+
+          <div className="mt-8 rounded-lg border border-border bg-surface-alt p-5">
+            <p className="text-sm text-secondary">Your workspace URL</p>
+            <p className="mt-1 font-mono text-sm font-semibold text-primary">{workspaceUrl}</p>
+            <p className="mt-4 text-sm text-secondary">
+              Share this link with your team. Sign in as the admin you just created to finish setup.
+            </p>
+          </div>
+
+          <a href={loginUrl} className="mt-6 block">
+            <Button size="lg" className="w-full shadow-sm">
+              <span className="inline-flex items-center gap-2">
+                Go to {success.companyName} login
+                <ExternalLink className="h-4 w-4" strokeWidth={1.5} />
+              </span>
+            </Button>
+          </a>
+
+          <AuthFooterLink prompt="Already have an account?" linkLabel="Sign In" to="/login" />
+        </AuthCard>
+      </AuthLayout>
+    )
+  }
 
   return (
     <AuthLayout>

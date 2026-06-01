@@ -1,4 +1,5 @@
 import { Pencil, Trash2 } from 'lucide-react'
+import { PermissionGate } from '../../../components/shared/PermissionGate'
 import { Badge } from '../../../components/ui/Badge'
 import { Button } from '../../../components/ui/Button'
 import { formatDate } from '../../../utils/date.utils'
@@ -57,20 +58,24 @@ export function JobCard({ job, canDelete, onEdit, onDelete }: JobCardProps) {
       </div>
 
       <div className="mt-4 flex gap-2 border-t border-border/70 pt-4">
-        <Button variant="outline" size="sm" onClick={() => onEdit(job)}>
-          <Pencil className="mr-1.5 h-3.5 w-3.5" />
-          Edit
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={!canDelete}
-          title={!canDelete ? 'Cannot delete job with linked candidates' : undefined}
-          onClick={() => onDelete(job)}
-        >
-          <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-          Delete
-        </Button>
+        <PermissionGate module="recruitment" action="edit">
+          <Button variant="outline" size="sm" onClick={() => onEdit(job)}>
+            <Pencil className="mr-1.5 h-3.5 w-3.5" />
+            Edit
+          </Button>
+        </PermissionGate>
+        <PermissionGate module="recruitment" action="delete">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!canDelete}
+            title={!canDelete ? 'Cannot delete job with linked candidates' : undefined}
+            onClick={() => onDelete(job)}
+          >
+            <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+            Delete
+          </Button>
+        </PermissionGate>
       </div>
     </div>
   )

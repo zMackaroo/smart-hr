@@ -1,4 +1,5 @@
 import { Button } from '../../../components/ui/Button'
+import { PermissionGate } from '../../../components/shared/PermissionGate'
 import { formatDate } from '../../../utils/date.utils'
 import {
   CATEGORY_LABELS,
@@ -49,18 +50,24 @@ export function TicketInfoPanel({
           <dt className="text-xs font-medium uppercase tracking-wide text-muted">Status</dt>
           <dd className="mt-1">
             {isAdmin ? (
-              <select
-                className={selectClass}
-                value={ticket.status}
-                disabled={isSubmitting}
-                onChange={(e) => onUpdateStatus(e.target.value as TicketStatus)}
+              <PermissionGate
+                module="tickets"
+                action="edit"
+                fallback={<TicketStatusBadge status={ticket.status} />}
               >
-                {STATUS_OPTIONS.map((s) => (
-                  <option key={s} value={s}>
-                    {s === 'in_progress' ? 'In Progress' : s.charAt(0).toUpperCase() + s.slice(1)}
-                  </option>
-                ))}
-              </select>
+                <select
+                  className={selectClass}
+                  value={ticket.status}
+                  disabled={isSubmitting}
+                  onChange={(e) => onUpdateStatus(e.target.value as TicketStatus)}
+                >
+                  {STATUS_OPTIONS.map((s) => (
+                    <option key={s} value={s}>
+                      {s === 'in_progress' ? 'In Progress' : s.charAt(0).toUpperCase() + s.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </PermissionGate>
             ) : (
               <TicketStatusBadge status={ticket.status} />
             )}
@@ -71,18 +78,24 @@ export function TicketInfoPanel({
           <dt className="text-xs font-medium uppercase tracking-wide text-muted">Priority</dt>
           <dd className="mt-1">
             {isAdmin ? (
-              <select
-                className={selectClass}
-                value={ticket.priority}
-                disabled={isSubmitting}
-                onChange={(e) => onUpdatePriority(e.target.value as TicketPriority)}
+              <PermissionGate
+                module="tickets"
+                action="edit"
+                fallback={<TicketPriorityBadge priority={ticket.priority} />}
               >
-                {PRIORITY_OPTIONS.map((p) => (
-                  <option key={p} value={p}>
-                    {p.charAt(0).toUpperCase() + p.slice(1)}
-                  </option>
-                ))}
-              </select>
+                <select
+                  className={selectClass}
+                  value={ticket.priority}
+                  disabled={isSubmitting}
+                  onChange={(e) => onUpdatePriority(e.target.value as TicketPriority)}
+                >
+                  {PRIORITY_OPTIONS.map((p) => (
+                    <option key={p} value={p}>
+                      {p.charAt(0).toUpperCase() + p.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </PermissionGate>
             ) : (
               <TicketPriorityBadge priority={ticket.priority} />
             )}
@@ -113,44 +126,46 @@ export function TicketInfoPanel({
       </dl>
 
       {isAdmin && (
-        <div className="mt-6 space-y-2 border-t border-border/70 pt-4">
-          <Button variant="outline" size="sm" className="w-full" onClick={onAssign}>
-            Assign
-          </Button>
-          {(ticket.status === 'open' || ticket.status === 'in_progress') && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              disabled={isSubmitting}
-              onClick={onMarkResolved}
-            >
-              Mark Resolved
+        <PermissionGate module="tickets" action="edit">
+          <div className="mt-6 space-y-2 border-t border-border/70 pt-4">
+            <Button variant="outline" size="sm" className="w-full" onClick={onAssign}>
+              Assign
             </Button>
-          )}
-          {ticket.status === 'resolved' && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              disabled={isSubmitting}
-              onClick={onCloseTicket}
-            >
-              Close Ticket
-            </Button>
-          )}
-          {(ticket.status === 'closed' || ticket.status === 'resolved') && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              disabled={isSubmitting}
-              onClick={onReopen}
-            >
-              Reopen
-            </Button>
-          )}
-        </div>
+            {(ticket.status === 'open' || ticket.status === 'in_progress') && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                disabled={isSubmitting}
+                onClick={onMarkResolved}
+              >
+                Mark Resolved
+              </Button>
+            )}
+            {ticket.status === 'resolved' && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                disabled={isSubmitting}
+                onClick={onCloseTicket}
+              >
+                Close Ticket
+              </Button>
+            )}
+            {(ticket.status === 'closed' || ticket.status === 'resolved') && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                disabled={isSubmitting}
+                onClick={onReopen}
+              >
+                Reopen
+              </Button>
+            )}
+          </div>
+        </PermissionGate>
       )}
     </div>
   )

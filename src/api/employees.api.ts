@@ -14,6 +14,11 @@ import {
   getDepartmentOptions,
   getDesignationOptions,
 } from './org-data'
+import {
+  assertCompanyAccess,
+  filterByCompany,
+  getActiveCompanyIdSync,
+} from '../utils/company-context.utils'
 
 const MOCK_DELAY_MS = 400
 
@@ -119,7 +124,7 @@ function defaultDetailExtras(employee: Employee): Omit<EmployeeDetail, keyof Emp
 }
 
 function createMockEmployees(): EmployeeDetail[] {
-  const seeds: Array<Omit<Employee, 'id' | 'employeeId' | 'fullName'> & { id?: string }> = [
+  const seeds: Array<Omit<Employee, 'id' | 'employeeId' | 'fullName' | 'companyId'> & { id?: string }> = [
     {
       id: 'usr-employee-1',
       firstName: 'Jane',
@@ -239,8 +244,8 @@ function createMockEmployees(): EmployeeDetail[] {
     },
   ]
 
-  const deptOptions = getDepartmentOptions()
-  const desigOptions = getDesignationOptions()
+  const deptOptions = getDepartmentOptions('co-1')
+  const desigOptions = getDesignationOptions('co-1')
   const extras = [
     { firstName: 'Chris', lastName: 'Evans', department: deptOptions[0], designation: desigOptions[0] },
     { firstName: 'Nina', lastName: 'Patel', department: deptOptions[2], designation: desigOptions[4] },
@@ -273,6 +278,7 @@ function createMockEmployees(): EmployeeDetail[] {
     const employee: Employee = EmployeeSchema.parse({
       ...seed,
       id,
+      companyId: 'co-1',
       employeeId: `EMP-${String(index + 1).padStart(3, '0')}`,
       fullName: `${seed.firstName} ${seed.lastName}`,
     })
@@ -283,7 +289,116 @@ function createMockEmployees(): EmployeeDetail[] {
   })
 }
 
-let employeeStore: EmployeeDetail[] = createMockEmployees()
+function createAcmeEmployees(): EmployeeDetail[] {
+  const seeds: Array<Omit<Employee, 'id' | 'employeeId' | 'fullName' | 'companyId'> & { id: string }> = [
+    {
+      id: 'usr-co2-admin',
+      firstName: 'Alex',
+      lastName: 'Admin',
+      email: 'admin@acme.com',
+      phone: '+1 555-2001',
+      department: { id: 'dept-co2-2', name: 'Sales' },
+      designation: { id: 'des-co2-2', name: 'Sales Representative' },
+      role: 'hr_admin',
+      status: 'active',
+      joinDate: '2025-06-01',
+      location: 'Austin',
+    },
+    {
+      id: 'usr-co2-employee-1',
+      firstName: 'Bob',
+      lastName: 'Builder',
+      email: 'employee@acme.com',
+      phone: '+1 555-2002',
+      department: { id: 'dept-co2-1', name: 'Engineering' },
+      designation: { id: 'des-co2-1', name: 'Engineer' },
+      role: 'employee',
+      status: 'active',
+      joinDate: '2025-07-01',
+      managerId: 'usr-co2-admin',
+      managerName: 'Alex Admin',
+      location: 'Austin',
+    },
+    {
+      id: 'emp-co2-3',
+      firstName: 'Carla',
+      lastName: 'Nguyen',
+      email: 'carla.nguyen@acme.com',
+      department: { id: 'dept-co2-1', name: 'Engineering' },
+      designation: { id: 'des-co2-1', name: 'Engineer' },
+      role: 'employee',
+      status: 'active',
+      joinDate: '2025-08-15',
+      managerId: 'usr-co2-admin',
+      managerName: 'Alex Admin',
+      location: 'Remote',
+    },
+  ]
+
+  return seeds.map((seed, index) => {
+    const employee: Employee = EmployeeSchema.parse({
+      ...seed,
+      companyId: 'co-2',
+      employeeId: `ACM-${String(index + 1).padStart(3, '0')}`,
+      fullName: `${seed.firstName} ${seed.lastName}`,
+    })
+    return EmployeeDetailSchema.parse({
+      ...employee,
+      ...defaultDetailExtras(employee),
+    })
+  })
+}
+
+function assignOrgHierarchy(employees: EmployeeDetail[]): EmployeeDetail[] {
+  const findByName = (firstName: string, lastName: string) =>
+    employees.find((employee) => employee.firstName === firstName && employee.lastName === lastName)
+
+  const emily = findByName('Emily', 'Davis')
+  const sarah = findByName('Sarah', 'Chen')
+  const michael = findByName('Michael', 'Torres')
+  const anna = findByName('Anna', 'Martinez')
+  const jane = employees.find((employee) => employee.id === 'usr-employee-1')
+  const priya = findByName('Priya', 'Sharma')
+  const david = findByName('David', 'Kim')
+  const chris = findByName('Chris', 'Evans')
+  const ethan = findByName('Ethan', 'Clark')
+  const lisa = findByName('Lisa', 'Park')
+  const james = findByName('James', 'Wilson')
+  const robert = findByName('Robert', 'Brown')
+  const marcus = findByName('Marcus', 'Young')
+
+  const links: Array<[EmployeeDetail | undefined, EmployeeDetail | undefined]> = [
+    [sarah, emily],
+    [michael, emily],
+    [anna, emily],
+    [marcus, emily],
+    [jane, sarah],
+    [priya, sarah],
+    [david, sarah],
+    [ethan, sarah],
+    [chris, jane],
+    [lisa, michael],
+    [james, anna],
+    [robert, emily],
+  ]
+
+  for (const [employee, manager] of links) {
+    if (!employee || !manager) continue
+    employee.managerId = manager.id
+    employee.managerName = manager.fullName
+    if (employee.work) {
+      employee.work.reportingManager = { id: manager.id, name: manager.fullName }
+    }
+  }
+
+  return employees
+}
+
+function createMockEmployeesWithHierarchy(): EmployeeDetail[] {
+  return assignOrgHierarchy([...createMockEmployees(), ...createAcmeEmployees()])
+}
+
+let employeeStore: EmployeeDetail[] = createMockEmployeesWithHierarchy()
 let nextId = employeeStore.length + 1
 
 function delay(ms = MOCK_DELAY_MS) {
@@ -292,6 +407,10 @@ function delay(ms = MOCK_DELAY_MS) {
 
 function toEmployee(detail: EmployeeDetail): Employee {
   return EmployeeSchema.parse(detail)
+}
+
+function companyEmployees(companyId = getActiveCompanyIdSync()): EmployeeDetail[] {
+  return filterByCompany(employeeStore, companyId)
 }
 
 export async function getEmployees(params: {
@@ -307,7 +426,7 @@ export async function getEmployees(params: {
 
   const page = params.page ?? 1
   const perPage = params.perPage ?? 20
-  let filtered = [...employeeStore]
+  let filtered = [...companyEmployees()]
 
   if (params.search) {
     const q = params.search.toLowerCase()
@@ -351,11 +470,28 @@ export async function getEmployees(params: {
 
 export async function getEmployee(id: string): Promise<EmployeeDetail> {
   await delay()
-  const employee = employeeStore.find((e) => e.id === id)
+  const employee = companyEmployees().find((e) => e.id === id)
   if (!employee) {
     throw new Error('Employee not found')
   }
+  assertCompanyAccess(employee.companyId)
   return EmployeeDetailSchema.parse(employee)
+}
+
+export function getEmployeeByIdSync(id: string): EmployeeDetail | undefined {
+  return employeeStore.find((employee) => employee.id === id)
+}
+
+export function getEmployeeLinkOptions(): Array<{
+  id: string
+  name: string
+  employeeId: string
+}> {
+  return companyEmployees().map((employee) => ({
+    id: employee.id,
+    name: employee.fullName,
+    employeeId: employee.employeeId,
+  }))
 }
 
 export async function createEmployee(data: EmployeeFormInput): Promise<Employee> {
@@ -377,6 +513,7 @@ export async function createEmployee(data: EmployeeFormInput): Promise<Employee>
 
   const base: Employee = EmployeeSchema.parse({
     id,
+    companyId: getActiveCompanyIdSync(),
     employeeId,
     firstName: data.firstName,
     lastName: data.lastName,
@@ -410,6 +547,7 @@ export async function updateEmployee(
 
   const index = employeeStore.findIndex((e) => e.id === id)
   if (index === -1) throw new Error('Employee not found')
+  assertCompanyAccess(employeeStore[index].companyId)
 
   const current = employeeStore[index]
   const department = data.departmentId ? findDepartment(data.departmentId) : undefined
@@ -447,6 +585,9 @@ export async function updateEmployee(
 
 export async function deleteEmployee(id: string): Promise<void> {
   await delay()
+  const employee = employeeStore.find((e) => e.id === id)
+  if (!employee) throw new Error('Employee not found')
+  assertCompanyAccess(employee.companyId)
   employeeStore = employeeStore.filter((e) => e.id !== id)
 }
 
@@ -517,15 +658,26 @@ export { getDepartmentOptions, getDesignationOptions }
 
 export function getEmployeeDepartmentCounts(): Record<string, number> {
   const counts: Record<string, number> = {}
-  for (const employee of employeeStore) {
+  for (const employee of companyEmployees()) {
     counts[employee.department.id] = (counts[employee.department.id] ?? 0) + 1
+  }
+  return counts
+}
+
+export function getEmployeeRoleCounts(): Record<
+  'super_admin' | 'hr_admin' | 'employee',
+  number
+> {
+  const counts = { super_admin: 0, hr_admin: 0, employee: 0 }
+  for (const employee of companyEmployees()) {
+    counts[employee.role]++
   }
   return counts
 }
 
 export function getEmployeeDesignationCounts(): Record<string, number> {
   const counts: Record<string, number> = {}
-  for (const employee of employeeStore) {
+  for (const employee of companyEmployees()) {
     counts[employee.designation.id] = (counts[employee.designation.id] ?? 0) + 1
   }
   return counts
@@ -536,7 +688,7 @@ export function getEmployeePickerOptions(): Array<{
   name: string
   avatarUrl?: string
 }> {
-  return employeeStore.map((e) => ({
+  return companyEmployees().map((e) => ({
     id: e.id,
     name: e.fullName,
     avatarUrl: e.avatarUrl,
@@ -548,16 +700,9 @@ export function getAdminAssigneeOptions(): Array<{
   name: string
   avatarUrl?: string
 }> {
-  const fromStore = employeeStore
+  return companyEmployees()
     .filter((e) => e.role === 'hr_admin' || e.role === 'super_admin')
     .map((e) => ({ id: e.id, name: e.fullName, avatarUrl: e.avatarUrl }))
-
-  const extras = [
-    { id: 'usr-admin-1', name: 'HR Admin' },
-    { id: 'usr-super-1', name: 'Super Admin' },
-  ].filter((a) => !fromStore.some((e) => e.id === a.id))
-
-  return [...extras, ...fromStore]
 }
 
 export function getAllEmployeesForAttendance(): Array<{
@@ -567,18 +712,20 @@ export function getAllEmployeesForAttendance(): Array<{
   avatarUrl?: string
   departmentId: string
   departmentName: string
+  companyId: string
 }> {
-  return employeeStore.map((e) => ({
+  return companyEmployees().map((e) => ({
     id: e.id,
     employeeId: e.employeeId,
     fullName: e.fullName,
     avatarUrl: e.avatarUrl,
     departmentId: e.department.id,
     departmentName: e.department.name,
+    companyId: e.companyId,
   }))
 }
 
-export function getAllEmployeesForPayroll(): Array<{
+export function getAllEmployeesForPayroll(companyId?: string): Array<{
   id: string
   employeeId: string
   fullName: string
@@ -586,8 +733,9 @@ export function getAllEmployeesForPayroll(): Array<{
   departmentId: string
   departmentName: string
   designationName: string
+  companyId: string
 }> {
-  return employeeStore.map((e) => ({
+  return companyEmployees(companyId).map((e) => ({
     id: e.id,
     employeeId: e.employeeId,
     fullName: e.fullName,
@@ -595,9 +743,36 @@ export function getAllEmployeesForPayroll(): Array<{
     departmentId: e.department.id,
     departmentName: e.department.name,
     designationName: e.designation.name,
+    companyId: e.companyId,
+  }))
+}
+
+export function getAllEmployeesForOrgChart(): Array<{
+  id: string
+  employeeId: string
+  fullName: string
+  avatarUrl?: string
+  designationName: string
+  departmentId: string
+  departmentName: string
+  managerId?: string
+  managerName?: string
+  status: EmployeeStatus
+}> {
+  return companyEmployees().map((employee) => ({
+    id: employee.id,
+    employeeId: employee.employeeId,
+    fullName: employee.fullName,
+    avatarUrl: employee.avatarUrl,
+    designationName: employee.designation.name,
+    departmentId: employee.department.id,
+    departmentName: employee.department.name,
+    managerId: employee.managerId,
+    managerName: employee.managerName,
+    status: employee.status,
   }))
 }
 
 export function getManagerOptions(): Array<{ id: string; name: string }> {
-  return employeeStore.map((e) => ({ id: e.id, name: e.fullName }))
+  return companyEmployees().map((e) => ({ id: e.id, name: e.fullName }))
 }

@@ -10,6 +10,7 @@ export type AttendanceStatus =
 
 export const AttendanceRecordSchema = z.object({
   id: z.string(),
+  companyId: z.string(),
   employeeId: z.string(),
   employeeName: z.string(),
   avatarUrl: z.string().optional(),

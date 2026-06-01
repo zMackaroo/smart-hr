@@ -13,6 +13,8 @@ export function useTopbarViewModel() {
   const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed)
   const toggleSidebar = useUIStore((state) => state.toggleSidebar)
   const { isSuperAdmin } = usePermission()
+  const tenantMode = useUIStore((state) => state.tenantMode)
+  const resolvedTenant = useUIStore((state) => state.resolvedTenant)
 
   const breadcrumbs = useMemo(
     () => buildBreadcrumbs(location.pathname),
@@ -35,6 +37,8 @@ export function useTopbarViewModel() {
     breadcrumbs,
     unreadCount: 3,
     showSettings: isSuperAdmin,
+    showCompanySwitcher: isSuperAdmin && tenantMode === 'platform',
+    tenantBadge: tenantMode === 'tenant' && resolvedTenant ? resolvedTenant.name : null,
     onLogout,
   }
 }

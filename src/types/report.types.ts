@@ -8,6 +8,9 @@ export type ReportType =
   | 'payment'
   | 'expense'
   | 'user_activity'
+  | 'daily'
+  | 'project'
+  | 'task'
 
 export const ReportMetaSchema = z.object({
   type: z.enum([
@@ -18,6 +21,9 @@ export const ReportMetaSchema = z.object({
     'payment',
     'expense',
     'user_activity',
+    'daily',
+    'project',
+    'task',
   ]),
   title: z.string(),
   description: z.string(),
@@ -33,6 +39,7 @@ export const ReportFilterSchema = z.object({
   year: z.number().optional(),
   departmentId: z.string().optional(),
   employeeId: z.string().optional(),
+  projectId: z.string().optional(),
   status: z.string().optional(),
 })
 export type ReportFilter = z.infer<typeof ReportFilterSchema>
@@ -53,6 +60,9 @@ export const ReportDataSchema = z.object({
     'payment',
     'expense',
     'user_activity',
+    'daily',
+    'project',
+    'task',
   ]),
   title: z.string(),
   generatedAt: z.string(),
@@ -67,15 +77,27 @@ export type ReportRow = Record<string, string | number | null>
 
 export const REPORT_FILTER_CONFIG: Record<
   ReportType,
-  Array<'departmentId' | 'status' | 'month' | 'year' | 'dateFrom' | 'dateTo' | 'employeeId'>
+  Array<
+    | 'departmentId'
+    | 'status'
+    | 'month'
+    | 'year'
+    | 'dateFrom'
+    | 'dateTo'
+    | 'employeeId'
+    | 'projectId'
+  >
 > = {
   employee: ['departmentId', 'status'],
   attendance: ['month', 'year', 'departmentId', 'status'],
   leave: ['month', 'year', 'departmentId', 'status'],
   payslip: ['month', 'year', 'departmentId'],
   payment: ['month', 'year', 'departmentId'],
-  expense: [],
+  expense: ['month', 'year', 'departmentId', 'status'],
   user_activity: ['dateFrom', 'dateTo', 'employeeId'],
+  daily: ['dateFrom', 'dateTo', 'employeeId'],
+  project: ['projectId', 'dateFrom', 'dateTo'],
+  task: ['projectId', 'employeeId', 'status'],
 }
 
 export function getDefaultReportFilters(type: ReportType): ReportFilter {
@@ -88,6 +110,8 @@ export function getDefaultReportFilters(type: ReportType): ReportFilter {
 
   switch (type) {
     case 'user_activity':
+    case 'daily':
+    case 'project':
       return {
         dateFrom: dateFrom.toISOString().split('T')[0],
         dateTo,

@@ -11,6 +11,7 @@ interface ReportFiltersProps {
   filters: ReportFilter
   departments: Department[]
   employees: Array<{ id: string; name: string }>
+  projects: Array<{ id: string; name: string }>
   isLoading: boolean
   onChange: (filters: ReportFilter) => void
   onApply: () => void
@@ -57,11 +58,29 @@ const LEAVE_STATUS_OPTIONS = [
   { value: 'cancelled', label: 'Cancelled' },
 ]
 
+const EXPENSE_STATUS_OPTIONS = [
+  { value: '', label: 'All Statuses' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'approved', label: 'Approved' },
+  { value: 'rejected', label: 'Rejected' },
+  { value: 'reimbursed', label: 'Reimbursed' },
+  { value: 'cancelled', label: 'Cancelled' },
+]
+
+const TASK_STATUS_OPTIONS = [
+  { value: '', label: 'All Statuses' },
+  { value: 'todo', label: 'To Do' },
+  { value: 'in_progress', label: 'In Progress' },
+  { value: 'done', label: 'Done' },
+  { value: 'blocked', label: 'Blocked' },
+]
+
 export function ReportFilters({
   reportType,
   filters,
   departments,
   employees,
+  projects,
   isLoading,
   onChange,
   onApply,
@@ -80,7 +99,11 @@ export function ReportFilters({
       ? ATTENDANCE_STATUS_OPTIONS
       : reportType === 'leave'
         ? LEAVE_STATUS_OPTIONS
-        : EMPLOYEE_STATUS_OPTIONS
+        : reportType === 'expense'
+          ? EXPENSE_STATUS_OPTIONS
+          : reportType === 'task'
+            ? TASK_STATUS_OPTIONS
+            : EMPLOYEE_STATUS_OPTIONS
 
   return (
     <div className="flex flex-wrap items-end gap-3">
@@ -171,6 +194,24 @@ export function ReportFilters({
             {statusOptions.map((opt) => (
               <option key={opt.label} value={opt.value}>
                 {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {config.includes('projectId') && (
+        <div>
+          <label className="mb-1 block text-xs font-medium text-muted">Project</label>
+          <select
+            className={selectClass}
+            value={filters.projectId ?? ''}
+            onChange={(e) => update({ projectId: e.target.value || undefined })}
+          >
+            <option value="">All Projects</option>
+            {projects.map((project) => (
+              <option key={project.id} value={project.id}>
+                {project.name}
               </option>
             ))}
           </select>

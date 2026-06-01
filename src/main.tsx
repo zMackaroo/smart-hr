@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
 import { ToastContainer } from './components/shared/ToastContainer'
+import { TenantProvider } from './components/tenant/TenantProvider'
 import { AppRoutes } from './router/routes'
 import './index.css'
 
@@ -19,8 +20,10 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AppRoutes />
-        <ToastContainer />
+        <TenantProvider>
+          <AppRoutes />
+          <ToastContainer />
+        </TenantProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </StrictMode>,

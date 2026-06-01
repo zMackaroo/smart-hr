@@ -20,6 +20,8 @@ const ROUTE_LABELS: Record<string, string> = {
   candidates: 'Candidates',
   referrals: 'Referrals',
   tickets: 'Tickets',
+  projects: 'Projects',
+  tasks: 'Tasks',
   reports: 'All Reports',
   settings: 'Settings',
 }
@@ -37,6 +39,8 @@ const SECTION_PREFIX: Record<string, string> = {
   jobs: 'Recruitment',
   candidates: 'Recruitment',
   referrals: 'Recruitment',
+  projects: 'Projects',
+  tasks: 'Tasks',
 }
 
 function formatSegment(segment: string): string {
@@ -68,11 +72,18 @@ export function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
     const isDetailId =
       index > 0 &&
       /^[a-zA-Z0-9-]+$/.test(segment) &&
-      (segments[index - 1] === 'employees' || segments[index - 1] === 'tickets')
+      (segments[index - 1] === 'employees' ||
+        segments[index - 1] === 'tickets' ||
+        segments[index - 1] === 'projects')
 
     if (isDetailId) {
+      const detailLabels: Record<string, string> = {
+        employees: 'Employee Detail',
+        tickets: 'Ticket Detail',
+        projects: 'Project Detail',
+      }
       breadcrumbs.push({
-        label: segments[index - 1] === 'employees' ? 'Employee Detail' : 'Ticket Detail',
+        label: detailLabels[segments[index - 1]] ?? 'Detail',
       })
       return
     }

@@ -4,6 +4,7 @@ export type LeaveStatus = 'pending' | 'approved' | 'rejected' | 'cancelled'
 
 export const LeaveTypeSchema = z.object({
   id: z.string(),
+  companyId: z.string(),
   name: z.string(),
   color: z.string(),
   defaultDays: z.number(),
@@ -36,6 +37,7 @@ export type LeaveBalance = z.infer<typeof LeaveBalanceSchema>
 
 export const LeaveRequestSchema = z.object({
   id: z.string(),
+  companyId: z.string(),
   employee: z.object({
     id: z.string(),
     name: z.string(),

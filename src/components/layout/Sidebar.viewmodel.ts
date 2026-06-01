@@ -14,9 +14,9 @@ export function useSidebarViewModel() {
   const user = useAuthStore((state) => state.user)
   const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed)
   const toggleSidebar = useUIStore((state) => state.toggleSidebar)
-  const { role } = usePermission()
+  const { role, canViewModule } = usePermission()
 
-  const sections = getNavSectionsForRole(role)
+  const sections = getNavSectionsForRole(role, canViewModule)
 
   return {
     user,

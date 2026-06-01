@@ -1,6 +1,7 @@
 import { Check, Eye, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { AlertTriangle } from 'lucide-react'
 import { ConfirmDialog } from '../../../components/shared/ConfirmDialog'
+import { PermissionGate } from '../../../components/shared/PermissionGate'
 import { StatusBadge } from '../../../components/shared/StatusBadge'
 import { UserAvatar } from '../../../components/layout/UserAvatar'
 import { Button } from '../../../components/ui/Button'
@@ -201,24 +202,26 @@ export function AdminLeavesView() {
                             <Eye className="h-4 w-4" strokeWidth={1.5} />
                           </button>
                           {request.status === 'pending' && (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => vm.openApproveModal(request)}
-                                className="rounded-md p-2 text-secondary hover:bg-surface-alt hover:text-success"
-                                aria-label="Approve"
-                              >
-                                <Check className="h-4 w-4" strokeWidth={1.5} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => vm.openRejectModal(request)}
-                                className="rounded-md p-2 text-secondary hover:bg-surface-alt hover:text-error"
-                                aria-label="Reject"
-                              >
-                                <X className="h-4 w-4" strokeWidth={1.5} />
-                              </button>
-                            </>
+                            <PermissionGate module="leaves" action="approve">
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => vm.openApproveModal(request)}
+                                  className="rounded-md p-2 text-secondary hover:bg-surface-alt hover:text-success"
+                                  aria-label="Approve"
+                                >
+                                  <Check className="h-4 w-4" strokeWidth={1.5} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => vm.openRejectModal(request)}
+                                  className="rounded-md p-2 text-secondary hover:bg-surface-alt hover:text-error"
+                                  aria-label="Reject"
+                                >
+                                  <X className="h-4 w-4" strokeWidth={1.5} />
+                                </button>
+                              </>
+                            </PermissionGate>
                           )}
                         </div>
                       </td>
@@ -241,10 +244,12 @@ export function AdminLeavesView() {
       ) : (
         <>
           <div className="mb-6 flex justify-end">
-            <Button onClick={vm.openAddLeaveTypeModal}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Leave Type
-            </Button>
+            <PermissionGate module="leaves" action="edit">
+              <Button onClick={vm.openAddLeaveTypeModal}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Leave Type
+              </Button>
+            </PermissionGate>
           </div>
 
           <div className="overflow-hidden rounded-lg border border-border/70 bg-surface shadow-card">
@@ -285,22 +290,26 @@ export function AdminLeavesView() {
                     </td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => vm.openEditLeaveTypeModal(lt)}
-                          className="rounded-md p-2 text-secondary hover:bg-surface-alt hover:text-primary"
-                          aria-label={`Edit ${lt.name}`}
-                        >
-                          <Pencil className="h-4 w-4" strokeWidth={1.5} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => vm.openDeleteLeaveTypeModal(lt)}
-                          className="rounded-md p-2 text-secondary hover:bg-surface-alt hover:text-error"
-                          aria-label={`Delete ${lt.name}`}
-                        >
-                          <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-                        </button>
+                        <PermissionGate module="leaves" action="edit">
+                          <button
+                            type="button"
+                            onClick={() => vm.openEditLeaveTypeModal(lt)}
+                            className="rounded-md p-2 text-secondary hover:bg-surface-alt hover:text-primary"
+                            aria-label={`Edit ${lt.name}`}
+                          >
+                            <Pencil className="h-4 w-4" strokeWidth={1.5} />
+                          </button>
+                        </PermissionGate>
+                        <PermissionGate module="leaves" action="delete">
+                          <button
+                            type="button"
+                            onClick={() => vm.openDeleteLeaveTypeModal(lt)}
+                            className="rounded-md p-2 text-secondary hover:bg-surface-alt hover:text-error"
+                            aria-label={`Delete ${lt.name}`}
+                          >
+                            <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                          </button>
+                        </PermissionGate>
                       </div>
                     </td>
                   </tr>

@@ -48,3 +48,117 @@ body {
 #root {
   min-height: 100vh;
 }
+
+.sidebar-scroll {
+  overscroll-behavior: contain;
+  scrollbar-color: rgb(163 189 204 / 0.35) var(--sidebar-bg);
+  scrollbar-width: thin;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: var(--sidebar-bg);
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgb(163 189 204 / 0.35);
+  border-radius: 9999px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgb(163 189 204 / 0.55);
+}
+
+.org-chart-scroll {
+  overscroll-behavior: contain;
+}
+
+/* Org chart connector lines */
+.org-tree {
+  --org-tree-line: #b8c5d6;
+  --org-tree-v-gap: 1.5rem;
+  --org-tree-h-gap: 1rem;
+}
+
+.org-tree-node--branch > .org-tree-card-slot {
+  margin-bottom: 0.75rem;
+}
+
+.org-tree-children {
+  position: relative;
+  margin-top: var(--org-tree-v-gap);
+}
+
+/* Parent stem: card center down to the horizontal rail */
+.org-tree-children::before {
+  content: '';
+  position: absolute;
+  top: calc(-1 * var(--org-tree-v-gap));
+  left: 50%;
+  width: 2px;
+  height: var(--org-tree-v-gap);
+  transform: translateX(-50%);
+  background-color: var(--org-tree-line);
+  pointer-events: none;
+}
+
+.org-tree-children > .org-tree-node {
+  position: relative;
+  flex: 0 0 auto;
+  padding-top: var(--org-tree-v-gap);
+  padding-right: var(--org-tree-h-gap);
+  padding-left: var(--org-tree-h-gap);
+}
+
+/* Vertical drop: horizontal rail down to child card */
+.org-tree-children > .org-tree-node::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: var(--org-tree-v-gap);
+  transform: translateX(-50%);
+  background-color: var(--org-tree-line);
+  pointer-events: none;
+}
+
+/* Horizontal rail segments between siblings */
+.org-tree-children > .org-tree-node::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  height: 2px;
+  background-color: var(--org-tree-line);
+  pointer-events: none;
+}
+
+.org-tree-children > .org-tree-node:first-child::after {
+  left: 50%;
+  right: 0;
+}
+
+.org-tree-children > .org-tree-node:last-child::after {
+  left: 0;
+  right: 50%;
+}
+
+.org-tree-children > .org-tree-node:not(:first-child):not(:last-child)::after {
+  left: 0;
+  right: 0;
+}
+
+.org-tree-children > .org-tree-node:only-child::after {
+  display: none;
+}
+
+.org-tree-children > .org-tree-node:first-child {
+  padding-left: 0;
+}
+
+.org-tree-children > .org-tree-node:last-child {
+  padding-right: 0;
+}

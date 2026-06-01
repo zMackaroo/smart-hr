@@ -65,11 +65,11 @@ function syncTicketMeta(record: TicketRecord) {
 }
 
 function seedTickets(): TicketRecord[] {
-  const employees = getAllEmployeesForPayroll()
+  const employees = getAllEmployeesForPayroll('co-1')
   const jane = employees.find((e) => e.id === 'usr-employee-1') ?? employees[0]
-  const sarah = employees.find((e) => e.fullName === 'Sarah Chen') ?? employees[1]
-  const michael = employees.find((e) => e.fullName === 'Michael Torres') ?? employees[2]
-  const emily = employees.find((e) => e.fullName === 'Emily Davis') ?? employees[3]
+  const sarah = employees.find((e) => e.fullName === 'Sarah Chen') ?? jane
+  const michael = employees.find((e) => e.fullName === 'Michael Torres') ?? jane
+  const emily = employees.find((e) => e.fullName === 'Emily Davis') ?? jane
 
   const seeds: Array<{
     subject: string
@@ -343,6 +343,7 @@ function seedTickets(): TicketRecord[] {
     const record: TicketRecord = {
       ticket: TicketSchema.parse({
         id: `tkt-${nextTicketId++}`,
+        companyId: 'co-1',
         ticketNumber: formatTicketNumber(nextTicketNumber++),
         subject: seed.subject,
         description: seed.description,
@@ -501,6 +502,7 @@ export async function createTicket(
   const record: TicketRecord = {
     ticket: TicketSchema.parse({
       id: `tkt-${nextTicketId++}`,
+      companyId: employee.companyId,
       ticketNumber: formatTicketNumber(nextTicketNumber++),
       subject: data.subject,
       description: data.description,

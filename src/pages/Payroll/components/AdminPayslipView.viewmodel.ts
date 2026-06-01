@@ -2,15 +2,17 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { getDepartments } from '../../../api/departments.api'
 import {
-  downloadPayslip,
   exportPayslips,
   generatePayslips,
+  getPayslip,
   getPayslips,
   markPayslipPaid,
 } from '../../../api/payroll.api'
 import { useDebounce } from '../../../hooks/useDebounce'
 import { useNotificationStore } from '../../../store/notificationStore'
 import type { Payslip, PayslipStatus } from '../../../types/payroll.types'
+import { downloadBlob } from '../../../utils/pdf.utils'
+import { generatePayslipPdf, getPayslipPdfFilename } from '../../../utils/payslip-pdf.utils'
 
 export function useAdminPayslipViewModel() {
   const queryClient = useQueryClient()
@@ -85,15 +87,19 @@ export function useAdminPayslipViewModel() {
   })
 
   const downloadMutation = useMutation({
-    mutationFn: downloadPayslip,
-    onSuccess: (blob, id) => {
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `payslip-${id}.csv`
-      link.click()
-      URL.revokeObjectURL(url)
+    mutationFn: async (id: string) => {
+      const payslip = await getPayslip(id)
+      return {
+        blob: generatePayslipPdf(payslip),
+        filename: getPayslipPdfFilename(payslip),
+      }
     },
+    onSuccess: ({ blob, filename }) => {
+      downloadBlob(blob, filename)
+      addNotification('success', 'Payslip PDF downloaded')
+    },
+    onError: (error: Error) =>
+      addNotification('error', error.message || 'Failed to generate payslip PDF'),
   })
 
   const markPaidMutation = useMutation({
@@ -150,6 +156,7 @@ export function useAdminPayslipViewModel() {
     onMarkPaid: (id: string) => markPaidMutation.mutate(id),
     isGenerating: generateMutation.isPending,
     isExporting: exportMutation.isPending,
+    isDownloading: downloadMutation.isPending,
     isMarkingPaid: markPaidMutation.isPending,
   }
 }

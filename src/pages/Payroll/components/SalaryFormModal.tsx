@@ -1,7 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, Trash2 } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
+import { getPrimaryBankAccountSync } from '../../../api/bank-accounts.api'
 import { previewSalary } from '../../../api/payroll.api'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
@@ -12,6 +14,7 @@ import {
   type EmployeeSalary,
   type SalaryFormInput,
 } from '../../../types/payroll.types'
+import { formatDepositAccount } from '../../../types/bank-account.types'
 import { SalaryBreakdownPanel } from './SalaryBreakdownPanel'
 
 interface SalaryFormModalProps {
@@ -38,7 +41,6 @@ export function SalaryFormModal({
       baseSalary: 0,
       payFrequency: 'monthly',
       effectiveFrom: '',
-      bankAccountLast4: '',
       components: [],
     },
   })
@@ -56,8 +58,12 @@ export function SalaryFormModal({
   const baseSalary = watch('baseSalary')
   const payFrequency = watch('payFrequency')
   const effectiveFrom = watch('effectiveFrom')
-  const bankAccountLast4 = watch('bankAccountLast4')
   const employeeId = watch('employeeId')
+
+  const primaryAccount = useMemo(
+    () => (employeeId ? getPrimaryBankAccountSync(employeeId) : null),
+    [employeeId],
+  )
 
   const preview = useMemo(
     () =>
@@ -66,10 +72,9 @@ export function SalaryFormModal({
         baseSalary: Number(baseSalary) || 0,
         payFrequency,
         effectiveFrom: effectiveFrom || '2026-01-01',
-        bankAccountLast4,
         components,
       }),
-    [employeeId, baseSalary, payFrequency, effectiveFrom, bankAccountLast4, components],
+    [employeeId, baseSalary, payFrequency, effectiveFrom, components],
   )
 
   useEffect(() => {
@@ -80,7 +85,6 @@ export function SalaryFormModal({
         baseSalary: salary.baseSalary,
         payFrequency: salary.payFrequency,
         effectiveFrom: salary.effectiveFrom,
-        bankAccountLast4: salary.bankAccountLast4 ?? '',
         components: salary.components.map(({ label, amount, type }) => ({
           label,
           amount,
@@ -93,7 +97,6 @@ export function SalaryFormModal({
         baseSalary: 50000,
         payFrequency: 'monthly',
         effectiveFrom: new Date().toISOString().split('T')[0],
-        bankAccountLast4: '',
         components: [
           { label: 'Housing Allowance', amount: 500, type: 'earning' },
           { label: 'Income Tax', amount: 6000, type: 'deduction' },
@@ -210,12 +213,33 @@ export function SalaryFormModal({
             error={errors.effectiveFrom?.message}
             {...register('effectiveFrom')}
           />
-          <Input
-            label="Bank Account Last 4"
-            maxLength={4}
-            error={errors.bankAccountLast4?.message}
-            {...register('bankAccountLast4')}
-          />
+        </div>
+
+        <div
+          className={`rounded-md border px-4 py-3 text-sm ${
+            primaryAccount
+              ? 'border-border bg-surface-alt/50 text-primary'
+              : 'border-warning/40 bg-warning/5 text-primary'
+          }`}
+        >
+          {primaryAccount ? (
+            <p>
+              <span className="text-secondary">Primary payout account: </span>
+              <span className="font-medium">{formatDepositAccount(primaryAccount)}</span>
+              {' · '}
+              <Link to="/payroll/bank-accounts" className="text-accent hover:underline">
+                Manage accounts
+              </Link>
+            </p>
+          ) : (
+            <p>
+              No primary payout account configured.{' '}
+              <Link to="/payroll/bank-accounts" className="font-medium text-accent hover:underline">
+                Add a bank account
+              </Link>{' '}
+              before processing payroll.
+            </p>
+          )}
         </div>
 
         <ComponentSection

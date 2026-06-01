@@ -1,4 +1,5 @@
 import { Search } from 'lucide-react'
+import { PermissionGate } from '../../components/shared/PermissionGate'
 import { ConfirmDialog } from '../../components/shared/ConfirmDialog'
 import { EmptyState } from '../../components/shared/EmptyState'
 import { UserAvatar } from '../../components/layout/UserAvatar'
@@ -28,9 +29,11 @@ export function ProvidentFundPage() {
         title="Provident Fund"
         breadcrumbs={[{ label: 'Payroll' }, { label: 'Provident Fund' }]}
         actions={
-          <Button variant="outline" onClick={vm.openSettingsModal}>
-            PF Settings
-          </Button>
+          <PermissionGate module="payroll" action="edit">
+            <Button variant="outline" onClick={vm.openSettingsModal}>
+              PF Settings
+            </Button>
+          </PermissionGate>
         }
       />
 
@@ -145,14 +148,16 @@ export function ProvidentFundPage() {
                   </td>
                   <td className="px-5 py-3.5">
                     {record.status !== 'closed' && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={vm.togglingId === record.id}
-                        onClick={() => vm.onToggleStatus(record.id)}
-                      >
-                        {record.status === 'active' ? 'Pause' : 'Resume'}
-                      </Button>
+                      <PermissionGate module="payroll" action="edit">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={vm.togglingId === record.id}
+                          onClick={() => vm.onToggleStatus(record.id)}
+                        >
+                          {record.status === 'active' ? 'Pause' : 'Resume'}
+                        </Button>
+                      </PermissionGate>
                     )}
                   </td>
                 </tr>

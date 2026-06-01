@@ -1,4 +1,5 @@
 import { Briefcase, Plus, Search } from 'lucide-react'
+import { PermissionGate } from '../../components/shared/PermissionGate'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Button } from '../../components/ui/Button'
 import { EmptyState } from '../../components/shared/EmptyState'
@@ -28,10 +29,12 @@ export function JobsPage() {
         title="Jobs"
         breadcrumbs={[{ label: 'Recruitment' }, { label: 'Jobs' }]}
         actions={
-          <Button onClick={vm.openAddModal}>
-            <Plus className="mr-2 h-4 w-4" />
-            Post Job
-          </Button>
+          <PermissionGate module="recruitment" action="create">
+            <Button onClick={vm.openAddModal}>
+              <Plus className="mr-2 h-4 w-4" />
+              Post Job
+            </Button>
+          </PermissionGate>
         }
       />
 
@@ -93,10 +96,12 @@ export function JobsPage() {
           description="Create a new job posting to start recruiting."
           icon={Briefcase}
           action={
-            <Button onClick={vm.openAddModal}>
-              <Plus className="mr-2 h-4 w-4" />
-              Post Job
-            </Button>
+            <PermissionGate module="recruitment" action="create">
+              <Button onClick={vm.openAddModal}>
+                <Plus className="mr-2 h-4 w-4" />
+                Post Job
+              </Button>
+            </PermissionGate>
           }
         />
       ) : (

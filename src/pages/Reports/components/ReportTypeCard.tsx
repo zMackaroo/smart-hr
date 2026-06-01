@@ -5,12 +5,15 @@ import {
   Clock,
   CreditCard,
   Receipt,
+  FolderKanban,
+  ListTodo,
   Users,
   Wallet,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Badge } from '../../../components/ui/Badge'
 import { Button } from '../../../components/ui/Button'
+import { PermissionGate } from '../../../components/shared/PermissionGate'
 import type { ReportMeta } from '../../../types/report.types'
 
 interface ReportTypeCardProps {
@@ -26,6 +29,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Wallet,
   CreditCard,
   Activity,
+  FolderKanban,
+  ListTodo,
 }
 
 export function ReportTypeCard({ report, onGenerate }: ReportTypeCardProps) {
@@ -52,15 +57,17 @@ export function ReportTypeCard({ report, onGenerate }: ReportTypeCardProps) {
       <p className="mt-2 flex-1 text-sm text-secondary">{report.description}</p>
 
       {report.available ? (
-        <Button
-          variant="outline"
-          size="sm"
-          className="mt-4 w-fit"
-          onClick={() => onGenerate(report.type)}
-        >
-          Generate Report
-          <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-        </Button>
+        <PermissionGate module="reports" action="view">
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-4 w-fit"
+            onClick={() => onGenerate(report.type)}
+          >
+            Generate Report
+            <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+          </Button>
+        </PermissionGate>
       ) : (
         <p className="mt-4 text-xs text-muted">Available in a future release</p>
       )}

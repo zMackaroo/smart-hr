@@ -7,13 +7,14 @@ interface NavItemProps {
   label: string
   href: string
   collapsed: boolean
+  end?: boolean
 }
 
-export function NavItem({ icon: Icon, label, href, collapsed }: NavItemProps) {
+export function NavItem({ icon: Icon, label, href, collapsed, end }: NavItemProps) {
   return (
     <NavLink
       to={href}
-      end={href === '/dashboard'}
+      end={end}
       title={collapsed ? label : undefined}
       className={({ isActive }) =>
         cn(

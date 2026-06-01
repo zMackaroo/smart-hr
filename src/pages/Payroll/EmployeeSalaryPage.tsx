@@ -1,4 +1,5 @@
 import { Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { PermissionGate } from '../../components/shared/PermissionGate'
 import { ConfirmDialog } from '../../components/shared/ConfirmDialog'
 import { EmptyState } from '../../components/shared/EmptyState'
 import { UserAvatar } from '../../components/layout/UserAvatar'
@@ -20,10 +21,12 @@ export function EmployeeSalaryPage() {
         title="Employee Salary"
         breadcrumbs={[{ label: 'Payroll' }, { label: 'Employee Salary' }]}
         actions={
-          <Button onClick={vm.openAddModal}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Salary
-          </Button>
+          <PermissionGate module="payroll" action="create">
+            <Button onClick={vm.openAddModal}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Salary
+            </Button>
+          </PermissionGate>
         }
       />
 
@@ -67,10 +70,12 @@ export function EmployeeSalaryPage() {
         <EmptyState
           title="No salary records found"
           action={
-            <Button onClick={vm.openAddModal}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Salary
-            </Button>
+            <PermissionGate module="payroll" action="create">
+              <Button onClick={vm.openAddModal}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Salary
+              </Button>
+            </PermissionGate>
           }
         />
       ) : (
@@ -125,22 +130,26 @@ export function EmployeeSalaryPage() {
                   </td>
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => vm.openEditModal(salary)}
-                        className="rounded-md p-2 text-secondary hover:bg-surface-alt hover:text-primary"
-                        aria-label="Edit"
-                      >
-                        <Pencil className="h-4 w-4" strokeWidth={1.5} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => vm.openDeleteModal(salary)}
-                        className="rounded-md p-2 text-secondary hover:bg-surface-alt hover:text-error"
-                        aria-label="Delete"
-                      >
-                        <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-                      </button>
+                      <PermissionGate module="payroll" action="edit">
+                        <button
+                          type="button"
+                          onClick={() => vm.openEditModal(salary)}
+                          className="rounded-md p-2 text-secondary hover:bg-surface-alt hover:text-primary"
+                          aria-label="Edit"
+                        >
+                          <Pencil className="h-4 w-4" strokeWidth={1.5} />
+                        </button>
+                      </PermissionGate>
+                      <PermissionGate module="payroll" action="delete">
+                        <button
+                          type="button"
+                          onClick={() => vm.openDeleteModal(salary)}
+                          className="rounded-md p-2 text-secondary hover:bg-surface-alt hover:text-error"
+                          aria-label="Delete"
+                        >
+                          <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                        </button>
+                      </PermissionGate>
                     </div>
                   </td>
                 </tr>

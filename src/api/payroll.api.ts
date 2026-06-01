@@ -18,6 +18,10 @@ import {
   type SalaryFormInput,
 } from '../types/payroll.types'
 import { getAllEmployeesForPayroll } from './employees.api'
+import {
+  filterByCompany,
+} from '../utils/company-context.utils'
+import { DEFAULT_CURRENCY } from '../config/currency.config'
 
 const MOCK_DELAY_MS = 350
 
@@ -75,6 +79,7 @@ function buildSalaryRecord(
 
   return EmployeeSalarySchema.parse({
     id,
+    companyId: employee.companyId,
     employee: {
       id: employee.id,
       employeeId: employee.employeeId,
@@ -92,7 +97,7 @@ function buildSalaryRecord(
     payFrequency: data.payFrequency,
     effectiveFrom: data.effectiveFrom,
     bankAccountLast4: data.bankAccountLast4 || undefined,
-    currency: 'USD',
+    currency: DEFAULT_CURRENCY,
     updatedAt: new Date().toISOString().split('T')[0],
   })
 }
@@ -104,6 +109,7 @@ function createPfRecord(salary: EmployeeSalary): ProvidentFundRecord {
 
   return ProvidentFundRecordSchema.parse({
     id: `pf-${nextPfId++}`,
+    companyId: salary.companyId,
     employee: {
       id: salary.employee.id,
       employeeId: salary.employee.employeeId,
@@ -184,6 +190,7 @@ function buildPayslipFromSalary(
 
   return PayslipSchema.parse({
     id: `ps-${nextPayslipId++}`,
+    companyId: salary.companyId,
     employee: {
       id: salary.employee.id,
       employeeId: salary.employee.employeeId,
@@ -226,7 +233,7 @@ export async function getEmployeeSalaries(params?: {
   perPage?: number
 }) {
   await delay()
-  let filtered = [...salaryStore]
+  let filtered = filterByCompany([...salaryStore])
 
   if (params?.search) {
     const q = params.search.toLowerCase()
@@ -307,6 +314,10 @@ export function getEmployeesWithoutSalary() {
   return getAllEmployeesForPayroll().filter((e) => !configured.has(e.id))
 }
 
+export function employeeHasSalaryRecord(employeeId: string): boolean {
+  return salaryStore.some((salary) => salary.employee.id === employeeId)
+}
+
 export async function getPayslips(params: {
   month?: number
   year?: number
@@ -318,7 +329,7 @@ export async function getPayslips(params: {
   perPage?: number
 }) {
   await delay()
-  let filtered = [...payslipStore]
+  let filtered = filterByCompany([...payslipStore])
 
   if (params.month) filtered = filtered.filter((p) => p.payPeriod.month === params.month)
   if (params.year) filtered = filtered.filter((p) => p.payPeriod.year === params.year)
@@ -360,7 +371,7 @@ export async function getMyPayslips(
   params?: { month?: number; year?: number },
 ): Promise<Payslip[]> {
   await delay()
-  let filtered = payslipStore.filter((p) => p.employee.id === employeeId)
+  let filtered = filterByCompany(payslipStore).filter((p) => p.employee.id === employeeId)
   if (params?.month) filtered = filtered.filter((p) => p.payPeriod.month === params.month)
   if (params?.year) filtered = filtered.filter((p) => p.payPeriod.year === params.year)
   return filtered.sort(
@@ -490,7 +501,7 @@ export async function getProvidentFundRecords(params?: {
   perPage?: number
 }) {
   await delay()
-  let filtered = [...pfStore]
+  let filtered = filterByCompany([...pfStore])
 
   if (params?.search) {
     const q = params.search.toLowerCase()

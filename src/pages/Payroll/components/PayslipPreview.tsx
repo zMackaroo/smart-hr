@@ -1,4 +1,6 @@
+import { getPrimaryBankAccountSync } from '../../../api/bank-accounts.api'
 import { formatCurrency } from '../../../utils/currency.utils'
+import { formatDepositAccount } from '../../../types/bank-account.types'
 import type { Payslip } from '../../../types/payroll.types'
 import { PayslipStatusBadge } from './PayslipStatusBadge'
 
@@ -7,6 +9,8 @@ interface PayslipPreviewProps {
 }
 
 export function PayslipPreview({ payslip }: PayslipPreviewProps) {
+  const depositAccount = formatDepositAccount(getPrimaryBankAccountSync(payslip.employee.id))
+
   return (
     <div className="rounded-lg border border-border bg-surface-alt/30 p-6">
       <div className="border-b border-border pb-4 text-center">
@@ -30,6 +34,10 @@ export function PayslipPreview({ payslip }: PayslipPreviewProps) {
         <p>
           <span className="text-secondary">Designation: </span>
           <span className="text-primary">{payslip.employee.designation}</span>
+        </p>
+        <p>
+          <span className="text-secondary">Deposit Account: </span>
+          <span className="text-primary">{depositAccount}</span>
         </p>
       </div>
 

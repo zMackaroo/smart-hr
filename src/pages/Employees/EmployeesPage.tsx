@@ -1,4 +1,5 @@
 import { LayoutGrid, List, Plus } from 'lucide-react'
+import { PermissionGate } from '../../components/shared/PermissionGate'
 import { Button } from '../../components/ui/Button'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { cn } from '../../utils/cn'
@@ -48,10 +49,12 @@ export function EmployeesPage() {
                 <List className="h-4 w-4" />
               </button>
             </div>
-            <Button onClick={vm.openAddModal}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Employee
-            </Button>
+            <PermissionGate module="employees" action="create">
+              <Button onClick={vm.openAddModal}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Employee
+              </Button>
+            </PermissionGate>
           </div>
         }
       />
