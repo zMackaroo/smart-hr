@@ -5,6 +5,7 @@ import { getDesignationOptions } from '../../../api/org-data'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import type { Department } from '../../../types/department.types'
 import {
   JobFormSchema,
@@ -112,9 +113,6 @@ export function JobFormModal({
     }
   }, [departmentId, designations, setValue, watch])
 
-  const selectClass =
-    'h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25'
-
   return (
     <Modal
       isOpen={isOpen}
@@ -141,49 +139,43 @@ export function JobFormModal({
           />
         </div>
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Department</label>
-          <select className={selectClass} {...register('departmentId')}>
-            <option value="">Select department</option>
-            {departments.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-          {errors.departmentId && (
-            <p className="mt-1 text-xs text-error">{errors.departmentId.message}</p>
-          )}
-        </div>
+        <Select
+          label="Department"
+          value={watch('departmentId')}
+          onChange={(v) => setValue('departmentId', v, { shouldValidate: true })}
+          error={errors.departmentId?.message}
+          placeholder="Select department"
+          options={[
+            { value: '', label: 'Select department' },
+            ...departments.map((d) => ({ value: d.id, label: d.name })),
+          ]}
+        />
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">
-            Designation (optional)
-          </label>
-          <select className={selectClass} {...register('designationId')}>
-            <option value="">Select designation</option>
-            {designations.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Designation (optional)"
+          value={watch('designationId') ?? ''}
+          onChange={(v) => setValue('designationId', v, { shouldValidate: true })}
+          placeholder="Select designation"
+          options={[
+            { value: '', label: 'Select designation' },
+            ...designations.map((d) => ({ value: d.id, label: d.name })),
+          ]}
+        />
 
         <div>
           <Input label="Location" error={errors.location?.message} {...register('location')} />
         </div>
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Employment Type</label>
-          <select className={selectClass} {...register('employmentType')}>
-            {Object.entries(EMPLOYMENT_TYPE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Employment Type"
+          value={watch('employmentType')}
+          onChange={(v) => setValue('employmentType', v as JobFormInput['employmentType'], { shouldValidate: true })}
+          searchable={false}
+          options={Object.entries(EMPLOYMENT_TYPE_LABELS).map(([value, label]) => ({
+            value,
+            label,
+          }))}
+        />
 
         <div>
           <Input
@@ -230,14 +222,17 @@ export function JobFormModal({
           />
         </div>
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Status</label>
-          <select className={selectClass} {...register('status')}>
-            <option value="draft">Draft</option>
-            <option value="open">Open</option>
-            <option value="closed">Closed</option>
-          </select>
-        </div>
+        <Select
+          label="Status"
+          value={watch('status')}
+          onChange={(v) => setValue('status', v as JobFormInput['status'], { shouldValidate: true })}
+          searchable={false}
+          options={[
+            { value: 'draft', label: 'Draft' },
+            { value: 'open', label: 'Open' },
+            { value: 'closed', label: 'Closed' },
+          ]}
+        />
 
         <div className="sm:col-span-2">
           <label className="mb-1 block text-sm font-medium text-primary">Description</label>

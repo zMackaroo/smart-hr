@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Button } from '../../../components/ui/Button'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 
 interface AssignTicketModalProps {
   isOpen: boolean
@@ -25,9 +26,6 @@ export function AssignTicketModal({
     if (isOpen) setSelectedId(currentAssigneeId ?? assignees[0]?.id ?? '')
   }, [isOpen, currentAssigneeId, assignees])
 
-  const selectClass =
-    'h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25'
-
   return (
     <Modal
       isOpen={isOpen}
@@ -47,21 +45,16 @@ export function AssignTicketModal({
         </>
       }
     >
-      <div>
-        <label className="mb-1 block text-sm font-medium text-primary">Assignee</label>
-        <select
-          className={selectClass}
-          value={selectedId}
-          onChange={(e) => setSelectedId(e.target.value)}
-        >
-          <option value="">Select assignee</option>
-          {assignees.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <Select
+        label="Assignee"
+        value={selectedId}
+        onChange={setSelectedId}
+        placeholder="Select assignee"
+        options={[
+          { value: '', label: 'Select assignee' },
+          ...assignees.map((a) => ({ value: a.id, label: a.name })),
+        ]}
+      />
     </Modal>
   )
 }

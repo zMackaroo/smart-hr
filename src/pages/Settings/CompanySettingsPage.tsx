@@ -11,6 +11,8 @@ export function CompanySettingsPage() {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors, isDirty },
   } = vm.form
 
@@ -64,9 +66,9 @@ export function CompanySettingsPage() {
           isLogoSubmitting={vm.isLogoSubmitting}
         />
 
-        <RegionalPreferencesSection register={register} errors={errors} />
+        <RegionalPreferencesSection watch={watch} setValue={setValue} errors={errors} />
 
-        <HrDefaultsSection register={register} errors={errors} />
+        <HrDefaultsSection register={register} watch={watch} setValue={setValue} errors={errors} />
 
         <NotificationPreferencesSection register={register} />
 

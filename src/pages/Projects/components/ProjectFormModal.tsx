@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import {
   ProjectFormSchema,
   PROJECT_STATUS_LABELS,
@@ -101,26 +102,25 @@ export function ProjectFormModal({
             {...register('description')}
           />
         </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Status</label>
-          <select className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm" {...register('status')}>
-            {(Object.keys(PROJECT_STATUS_LABELS) as ProjectStatus[]).map((status) => (
-              <option key={status} value={status}>
-                {PROJECT_STATUS_LABELS[status]}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Owner</label>
-          <select className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm" {...register('ownerId')}>
-            {employees.map((employee) => (
-              <option key={employee.id} value={employee.id}>
-                {employee.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Status"
+          value={watch('status')}
+          onChange={(v) => setValue('status', v as ProjectStatus, { shouldValidate: true })}
+          searchable={false}
+          options={(Object.keys(PROJECT_STATUS_LABELS) as ProjectStatus[]).map((status) => ({
+            value: status,
+            label: PROJECT_STATUS_LABELS[status],
+          }))}
+        />
+        <Select
+          label="Owner"
+          value={watch('ownerId')}
+          onChange={(v) => setValue('ownerId', v, { shouldValidate: true })}
+          options={employees.map((employee) => ({
+            value: employee.id,
+            label: employee.name,
+          }))}
+        />
         <div>
           <label className="mb-2 block text-sm font-medium text-primary">Members</label>
           <div className="max-h-40 space-y-2 overflow-y-auto rounded-md border border-border p-3">

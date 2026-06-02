@@ -77,6 +77,11 @@ function createSeedUsers(): InternalUser[] {
       email: 'super@smarthr.com',
       role: 'super_admin',
       status: 'active',
+      employee: {
+        id: 'usr-super-1',
+        employeeId: 'EMP-SUP',
+        name: 'Super Admin',
+      },
       lastLoginAt: '2026-06-01T08:30:00.000Z',
       createdAt: '2025-01-01T00:00:00.000Z',
       password: DEFAULT_PASSWORD,
@@ -88,6 +93,11 @@ function createSeedUsers(): InternalUser[] {
       email: 'admin@smarthr.com',
       role: 'hr_admin',
       status: 'active',
+      employee: {
+        id: 'usr-admin-1',
+        employeeId: 'EMP-HRA',
+        name: 'HR Admin',
+      },
       lastLoginAt: '2026-05-31T14:20:00.000Z',
       createdAt: '2025-01-02T00:00:00.000Z',
       password: DEFAULT_PASSWORD,

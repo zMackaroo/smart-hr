@@ -2,6 +2,7 @@ import { Check, Search, X } from 'lucide-react'
 import { PermissionGate } from '../../../components/shared/PermissionGate'
 import { Button } from '../../../components/ui/Button'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import { EmptyState } from '../../../components/shared/EmptyState'
 import { UserAvatar } from '../../../components/layout/UserAvatar'
 import { formatDate } from '../../../utils/date.utils'
@@ -21,9 +22,6 @@ const STATUS_TABS: Array<{ label: string; value: ReferralStatus | '' }> = [
 export function AdminReferralsView() {
   const vm = useAdminReferralsViewModel()
 
-  const selectClass =
-    'h-10 rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25'
-
   return (
     <>
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -41,18 +39,16 @@ export function AdminReferralsView() {
           />
         </div>
 
-        <select
+        <Select
           value={vm.selectedJob}
-          onChange={(e) => vm.setSelectedJob(e.target.value)}
-          className={selectClass}
-        >
-          <option value="">All Jobs</option>
-          {vm.jobs.map((j) => (
-            <option key={j.id} value={j.id}>
-              {j.title}
-            </option>
-          ))}
-        </select>
+          onChange={vm.setSelectedJob}
+          placeholder="All Jobs"
+          className="lg:w-52"
+          options={[
+            { value: '', label: 'All Jobs' },
+            ...vm.jobs.map((j) => ({ value: j.id, label: j.title })),
+          ]}
+        />
       </div>
 
       <div className="mb-6 flex flex-wrap gap-2">

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { PermissionGate } from '../../components/shared/PermissionGate'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Button } from '../../components/ui/Button'
+import { Select } from '../../components/ui/Select'
 import { EmployeePagination } from '../Employees/components/EmployeePagination'
 import { LogTimeModal } from './components/LogTimeModal'
 import { TaskStatusBadge } from './components/TaskStatusBadge'
@@ -46,18 +47,19 @@ export function TasksPage() {
             className="h-10 w-full rounded-md border border-border bg-surface pl-9 pr-3 text-sm"
           />
         </div>
-        <select
+        <Select
           value={vm.projectFilter}
-          onChange={(event) => vm.setProjectFilter(event.target.value)}
-          className="h-10 rounded-md border border-border bg-surface px-3 text-sm"
-        >
-          <option value="">All Projects</option>
-          {vm.projects.map((project) => (
-            <option key={project.id} value={project.id}>
-              {project.name}
-            </option>
-          ))}
-        </select>
+          onChange={vm.setProjectFilter}
+          placeholder="All Projects"
+          className="lg:w-52"
+          options={[
+            { value: '', label: 'All Projects' },
+            ...vm.projects.map((project) => ({
+              value: project.id,
+              label: project.name,
+            })),
+          ]}
+        />
       </div>
 
       <div className="mb-6 flex flex-wrap gap-2">

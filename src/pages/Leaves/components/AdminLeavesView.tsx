@@ -6,6 +6,7 @@ import { StatusBadge } from '../../../components/shared/StatusBadge'
 import { UserAvatar } from '../../../components/layout/UserAvatar'
 import { Button } from '../../../components/ui/Button'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import { EmployeePagination } from '../../Employees/components/EmployeePagination'
 import { formatDate } from '../../../utils/date.utils'
 import { cn } from '../../../utils/cn'
@@ -66,65 +67,62 @@ export function AdminLeavesView() {
       {vm.activeTab === 'requests' ? (
         <>
           <div className="mb-6 flex flex-col gap-3 xl:flex-row xl:items-center">
-            <select
+            <Select
               value={vm.statusFilter}
-              onChange={(e) => vm.setStatusFilter(e.target.value as LeaveStatus | '')}
-              className="h-10 rounded-md border border-border bg-surface px-3 text-sm"
-            >
-              {STATUS_OPTIONS.map((opt) => (
-                <option key={opt.label} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-            <select
+              onChange={(value) => vm.setStatusFilter(value as LeaveStatus | '')}
+              options={STATUS_OPTIONS}
+              placeholder="All Statuses"
+              searchable={false}
+              className="xl:w-44"
+            />
+            <Select
               value={vm.departmentFilter}
-              onChange={(e) => vm.setDepartmentFilter(e.target.value)}
-              className="h-10 rounded-md border border-border bg-surface px-3 text-sm"
-            >
-              <option value="">All Departments</option>
-              {vm.departments.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-            <select
+              onChange={vm.setDepartmentFilter}
+              options={[
+                { value: '', label: 'All Departments' },
+                ...vm.departments.map((department) => ({
+                  value: department.id,
+                  label: department.name,
+                })),
+              ]}
+              placeholder="All Departments"
+              className="xl:w-52"
+            />
+            <Select
               value={vm.leaveTypeFilter}
-              onChange={(e) => vm.setLeaveTypeFilter(e.target.value)}
-              className="h-10 rounded-md border border-border bg-surface px-3 text-sm"
-            >
-              <option value="">All Leave Types</option>
-              {vm.leaveTypes.map((lt) => (
-                <option key={lt.id} value={lt.id}>
-                  {lt.name}
-                </option>
-              ))}
-            </select>
-            <select
-              value={vm.selectedMonth === '' ? '' : vm.selectedMonth}
-              onChange={(e) =>
-                vm.setSelectedMonth(e.target.value ? Number(e.target.value) : '')
+              onChange={vm.setLeaveTypeFilter}
+              options={[
+                { value: '', label: 'All Leave Types' },
+                ...vm.leaveTypes.map((leaveType) => ({
+                  value: leaveType.id,
+                  label: leaveType.name,
+                })),
+              ]}
+              placeholder="All Leave Types"
+              className="xl:w-48"
+            />
+            <Select
+              value={vm.selectedMonth === '' ? '' : String(vm.selectedMonth)}
+              onChange={(value) =>
+                vm.setSelectedMonth(value ? Number(value) : '')
               }
-              className="h-10 rounded-md border border-border bg-surface px-3 text-sm"
-            >
-              {MONTHS.map((label, index) => (
-                <option key={label} value={index === 0 ? '' : index}>
-                  {label}
-                </option>
-              ))}
-            </select>
-            <select
-              value={vm.selectedYear}
-              onChange={(e) => vm.setSelectedYear(Number(e.target.value))}
-              className="h-10 rounded-md border border-border bg-surface px-3 text-sm"
-            >
-              {[2024, 2025, 2026, 2027].map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
+              options={MONTHS.map((label, index) => ({
+                value: index === 0 ? '' : String(index),
+                label,
+              }))}
+              searchable={false}
+              className="xl:w-40"
+            />
+            <Select
+              value={String(vm.selectedYear)}
+              onChange={(value) => vm.setSelectedYear(Number(value))}
+              options={[2024, 2025, 2026, 2027].map((year) => ({
+                value: String(year),
+                label: String(year),
+              }))}
+              searchable={false}
+              className="xl:w-28"
+            />
           </div>
 
           {vm.isLoading ? (

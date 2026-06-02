@@ -1,4 +1,5 @@
 import { Search } from 'lucide-react'
+import { Select } from '../../../components/ui/Select'
 import type { EmployeeStatus } from '../../../types/employee.types'
 import type { DepartmentOption } from '../../../types/employee.types'
 
@@ -49,29 +50,24 @@ export function EmployeeFilters({
             className="h-10 w-full rounded-md border border-border bg-surface pl-9 pr-3 text-sm text-primary placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
           />
         </div>
-        <select
+        <Select
           value={selectedDepartment}
-          onChange={(e) => onDepartmentChange(e.target.value)}
-          className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
-        >
-          <option value="">All Departments</option>
-          {departments.map((dept) => (
-            <option key={dept.id} value={dept.id}>
-              {dept.name}
-            </option>
-          ))}
-        </select>
-        <select
+          onChange={onDepartmentChange}
+          options={[
+            { value: '', label: 'All Departments' },
+            ...departments.map((dept) => ({ value: dept.id, label: dept.name })),
+          ]}
+          placeholder="All Departments"
+          className="lg:w-52"
+        />
+        <Select
           value={selectedStatus}
-          onChange={(e) => onStatusChange(e.target.value as EmployeeStatus | '')}
-          className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
-        >
-          {STATUS_OPTIONS.map((opt) => (
-            <option key={opt.label} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+          onChange={(value) => onStatusChange(value as EmployeeStatus | '')}
+          options={STATUS_OPTIONS}
+          placeholder="All Statuses"
+          searchable={false}
+          className="lg:w-44"
+        />
       </div>
       <p className="text-sm text-secondary">
         Showing {showing} of {total} employees

@@ -1,62 +1,64 @@
-import { Banknote, CheckCircle2, Clock, Wallet } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { formatCurrency } from '../../../utils/currency.utils'
+import { Archive, CheckCircle2, CircleDot, LoaderCircle } from 'lucide-react'
 import { cn } from '../../../utils/cn'
-import type { ExpenseListSummary } from '../../../types/expense.types'
 
-interface ExpenseSummaryCardsProps {
-  summary: ExpenseListSummary | undefined
+export interface TicketStatusCounts {
+  open: number
+  inProgress: number
+  resolved: number
+  closed: number
+}
+
+interface TicketSummaryCardsProps {
+  counts: TicketStatusCounts
   isLoading?: boolean
 }
 
-type CardTint = 'yellow' | 'green' | 'blue' | 'teal'
+type CardTint = 'blue' | 'yellow' | 'green' | 'slate'
 
 const cards: Array<{
-  key: keyof Pick<ExpenseListSummary, 'pending' | 'approved' | 'reimbursed' | 'pendingAmount'>
+  key: keyof TicketStatusCounts
   label: string
   icon: LucideIcon
-  format: 'number' | 'currency'
   tint: CardTint
 }> = [
-  { key: 'pending', label: 'Pending', icon: Clock, format: 'number', tint: 'yellow' },
-  { key: 'approved', label: 'Approved', icon: CheckCircle2, format: 'number', tint: 'green' },
-  { key: 'reimbursed', label: 'Reimbursed', icon: Wallet, format: 'number', tint: 'blue' },
-  {
-    key: 'pendingAmount',
-    label: 'Pending Amount',
-    icon: Banknote,
-    format: 'currency',
-    tint: 'teal',
-  },
+  { key: 'open', label: 'Open', icon: CircleDot, tint: 'blue' },
+  { key: 'inProgress', label: 'In Progress', icon: LoaderCircle, tint: 'yellow' },
+  { key: 'resolved', label: 'Resolved', icon: CheckCircle2, tint: 'green' },
+  { key: 'closed', label: 'Closed', icon: Archive, tint: 'slate' },
 ]
 
 const tintClasses: Record<
   CardTint,
-  { iconBg: string; iconText: string; accent: string; glow: string }
+  { iconBg: string; iconText: string; accent: string; glow: string; value: string }
 > = {
+  blue: {
+    iconBg: 'bg-[var(--state-info-bg)]',
+    iconText: 'text-info',
+    accent: 'border-l-info',
+    glow: 'from-[var(--state-info-bg)]',
+    value: 'text-info',
+  },
   yellow: {
     iconBg: 'bg-[var(--state-warning-bg)]',
     iconText: 'text-warning',
     accent: 'border-l-warning',
     glow: 'from-[var(--state-warning-bg)]',
+    value: 'text-warning',
   },
   green: {
     iconBg: 'bg-[var(--state-success-bg)]',
     iconText: 'text-success',
     accent: 'border-l-success',
     glow: 'from-[var(--state-success-bg)]',
+    value: 'text-success',
   },
-  blue: {
-    iconBg: 'bg-[var(--state-info-bg)]',
-    iconText: 'text-info',
-    accent: 'border-l-info',
-    glow: 'from-[var(--state-info-bg)]',
-  },
-  teal: {
-    iconBg: 'bg-teal-50',
-    iconText: 'text-teal-600',
-    accent: 'border-l-teal-500',
-    glow: 'from-teal-50',
+  slate: {
+    iconBg: 'bg-surface-alt',
+    iconText: 'text-muted',
+    accent: 'border-l-border',
+    glow: 'from-surface-alt',
+    value: 'text-secondary',
   },
 }
 
@@ -67,12 +69,12 @@ function SummaryCardSkeleton() {
         <div className="h-3 w-20 rounded bg-surface-alt" />
         <div className="h-10 w-10 rounded-lg bg-surface-alt" />
       </div>
-      <div className="mt-3 h-8 w-16 rounded bg-surface-alt" />
+      <div className="mt-3 h-8 w-10 rounded bg-surface-alt" />
     </div>
   )
 }
 
-export function ExpenseSummaryCards({ summary, isLoading }: ExpenseSummaryCardsProps) {
+export function TicketSummaryCards({ counts, isLoading }: TicketSummaryCardsProps) {
   if (isLoading) {
     return (
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -88,7 +90,7 @@ export function ExpenseSummaryCards({ summary, isLoading }: ExpenseSummaryCardsP
       {cards.map((card) => {
         const Icon = card.icon
         const colors = tintClasses[card.tint]
-        const value = summary?.[card.key] ?? 0
+        const value = counts[card.key]
 
         return (
           <div
@@ -121,8 +123,13 @@ export function ExpenseSummaryCards({ summary, isLoading }: ExpenseSummaryCardsP
               </div>
             </div>
 
-            <p className="relative mt-3 text-2xl font-bold tabular-nums leading-none tracking-tight text-primary xl:text-[1.75rem]">
-              {card.format === 'currency' ? formatCurrency(value) : value}
+            <p
+              className={cn(
+                'relative mt-3 text-2xl font-bold tabular-nums leading-none tracking-tight xl:text-[1.75rem]',
+                colors.value,
+              )}
+            >
+              {value}
             </p>
           </div>
         )

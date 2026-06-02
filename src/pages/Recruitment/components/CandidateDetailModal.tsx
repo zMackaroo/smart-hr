@@ -2,6 +2,7 @@ import { ExternalLink } from 'lucide-react'
 import { Badge } from '../../../components/ui/Badge'
 import { Button } from '../../../components/ui/Button'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import { UserAvatar } from '../../../components/layout/UserAvatar'
 import { formatDate } from '../../../utils/date.utils'
 import type { Candidate, CandidateStatus } from '../../../types/recruitment.types'
@@ -38,9 +39,6 @@ export function CandidateDetailModal({
   onUpdateStatus,
 }: CandidateDetailModalProps) {
   if (!candidate) return null
-
-  const selectClass =
-    'h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25'
 
   return (
     <Modal
@@ -132,23 +130,17 @@ export function CandidateDetailModal({
           </a>
         )}
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Update Status</label>
-          <select
-            className={selectClass}
-            value={candidate.status}
-            disabled={isSubmitting}
-            onChange={(e) =>
-              onUpdateStatus(candidate.id, e.target.value as CandidateStatus)
-            }
-          >
-            {STATUS_OPTIONS.map((s) => (
-              <option key={s} value={s}>
-                {s.charAt(0).toUpperCase() + s.slice(1)}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Update Status"
+          value={candidate.status}
+          onChange={(v) => onUpdateStatus(candidate.id, v as CandidateStatus)}
+          disabled={isSubmitting}
+          searchable={false}
+          options={STATUS_OPTIONS.map((s) => ({
+            value: s,
+            label: s.charAt(0).toUpperCase() + s.slice(1),
+          }))}
+        />
       </div>
     </Modal>
   )

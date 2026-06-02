@@ -7,6 +7,7 @@ import { UserAvatar } from '../../../components/layout/UserAvatar'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import { EmployeePagination } from '../../Employees/components/EmployeePagination'
 import { AttendanceEditSchema, type AttendanceEditInput, type AttendanceRecord, type AttendanceStatus } from '../../../types/attendance.types'
 import { formatDate, formatTime } from '../../../utils/date.utils'
@@ -179,7 +180,7 @@ function EditAttendanceModal({
     },
   })
 
-  const { register, handleSubmit, reset } = form
+  const { register, handleSubmit, reset, watch, setValue } = form
 
   useEffect(() => {
     if (!isOpen || !record) return
@@ -213,19 +214,13 @@ function EditAttendanceModal({
           </p>
           <Input label="Check In" type="time" {...register('checkIn')} />
           <Input label="Check Out" type="time" {...register('checkOut')} />
-          <div>
-            <label className="mb-1 block text-sm font-medium text-primary">Status</label>
-            <select
-              className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm"
-              {...register('status')}
-            >
-              {STATUS_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label="Status"
+            value={watch('status') ?? 'present'}
+            onChange={(v) => setValue('status', v as AttendanceStatus, { shouldValidate: true })}
+            searchable={false}
+            options={STATUS_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label }))}
+          />
         </form>
       )}
     </Modal>

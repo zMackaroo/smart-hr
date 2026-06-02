@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import {
   BankAccountFormSchema,
   ACCOUNT_TYPE_LABELS,
@@ -61,6 +62,8 @@ export function BankAccountFormModal({
     handleSubmit,
     reset,
     setError,
+    watch,
+    setValue,
     formState: { errors },
   } = form
 
@@ -126,24 +129,21 @@ export function BankAccountFormModal({
     >
       <form className="space-y-4" onSubmit={handleSubmit(submitHandler)}>
         {isAdmin && (
-          <div>
-            <label className="mb-1 block text-sm font-medium text-primary">Employee</label>
-            <select
-              className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm disabled:bg-surface-alt"
-              disabled={isEdit}
-              {...register('employeeId')}
-            >
-              <option value="">Select employee</option>
-              {employees.map((employee) => (
-                <option key={employee.id} value={employee.id}>
-                  {employee.fullName} ({employee.employeeId})
-                </option>
-              ))}
-            </select>
-            {errors.employeeId && (
-              <p className="mt-1 text-xs text-error">{errors.employeeId.message}</p>
-            )}
-          </div>
+          <Select
+            label="Employee"
+            value={watch('employeeId')}
+            onChange={(v) => setValue('employeeId', v, { shouldValidate: true })}
+            error={errors.employeeId?.message}
+            disabled={isEdit}
+            placeholder="Select employee"
+            options={[
+              { value: '', label: 'Select employee' },
+              ...employees.map((employee) => ({
+                value: employee.id,
+                label: `${employee.fullName} (${employee.employeeId})`,
+              })),
+            ]}
+          />
         )}
 
         <Input
@@ -155,19 +155,16 @@ export function BankAccountFormModal({
         <Input label="Bank Name" error={errors.bankName?.message} {...register('bankName')} />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-primary">Account Type</label>
-            <select
-              className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm"
-              {...register('accountType')}
-            >
-              {Object.entries(ACCOUNT_TYPE_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label="Account Type"
+            value={watch('accountType')}
+            onChange={(v) => setValue('accountType', v as BankAccountFormInput['accountType'], { shouldValidate: true })}
+            searchable={false}
+            options={Object.entries(ACCOUNT_TYPE_LABELS).map(([value, label]) => ({
+              value,
+              label,
+            }))}
+          />
           <Input
             label={isEdit ? 'Account Number (leave blank to keep)' : 'Account Number'}
             type="password"
@@ -190,17 +187,17 @@ export function BankAccountFormModal({
         </label>
 
         {isAdmin && isEdit && (
-          <div>
-            <label className="mb-1 block text-sm font-medium text-primary">Status</label>
-            <select
-              className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm"
-              {...register('status')}
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="pending_verification">Pending Verification</option>
-            </select>
-          </div>
+          <Select
+            label="Status"
+            value={watch('status') ?? 'active'}
+            onChange={(v) => setValue('status', v as NonNullable<ModalFormInput['status']>, { shouldValidate: true })}
+            searchable={false}
+            options={[
+              { value: 'active', label: 'Active' },
+              { value: 'inactive', label: 'Inactive' },
+              { value: 'pending_verification', label: 'Pending Verification' },
+            ]}
+          />
         )}
       </form>
     </Modal>

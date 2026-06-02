@@ -8,6 +8,7 @@ import { previewSalary } from '../../../api/payroll.api'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import {
   PAY_FREQUENCY_LABELS,
   SalaryFormSchema,
@@ -162,24 +163,21 @@ export function SalaryFormModal({
       }
     >
       <form className="space-y-4">
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Employee</label>
-          <select
-            className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm disabled:bg-surface-alt"
-            disabled={Boolean(salary)}
-            {...register('employeeId')}
-          >
-            <option value="">Select employee</option>
-            {employeeOptions.map((e) => (
-              <option key={e.id} value={e.id}>
-                {e.fullName} ({e.employeeId})
-              </option>
-            ))}
-          </select>
-          {errors.employeeId && (
-            <p className="mt-1 text-xs text-error">{errors.employeeId.message}</p>
-          )}
-        </div>
+        <Select
+          label="Employee"
+          value={employeeId}
+          onChange={(v) => setValue('employeeId', v, { shouldValidate: true })}
+          error={errors.employeeId?.message}
+          disabled={Boolean(salary)}
+          placeholder="Select employee"
+          options={[
+            { value: '', label: 'Select employee' },
+            ...employeeOptions.map((e) => ({
+              value: e.id,
+              label: `${e.fullName} (${e.employeeId})`,
+            })),
+          ]}
+        />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
@@ -189,21 +187,18 @@ export function SalaryFormModal({
             error={errors.baseSalary?.message}
             {...register('baseSalary', { valueAsNumber: true })}
           />
-          <div>
-            <label className="mb-1 block text-sm font-medium text-primary">Pay Frequency</label>
-            <select
-              className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm"
-              {...register('payFrequency')}
-            >
-              {(Object.keys(PAY_FREQUENCY_LABELS) as Array<keyof typeof PAY_FREQUENCY_LABELS>).map(
-                (key) => (
-                  <option key={key} value={key}>
-                    {PAY_FREQUENCY_LABELS[key]}
-                  </option>
-                ),
-              )}
-            </select>
-          </div>
+          <Select
+            label="Pay Frequency"
+            value={payFrequency}
+            onChange={(v) => setValue('payFrequency', v as SalaryFormInput['payFrequency'], { shouldValidate: true })}
+            searchable={false}
+            options={(Object.keys(PAY_FREQUENCY_LABELS) as Array<keyof typeof PAY_FREQUENCY_LABELS>).map(
+              (key) => ({
+                value: key,
+                label: PAY_FREQUENCY_LABELS[key],
+              }),
+            )}
+          />
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

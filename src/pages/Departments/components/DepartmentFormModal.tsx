@@ -6,6 +6,7 @@ import { getEmployeePickerOptions } from '../../../api/employees.api'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import { UserAvatar } from '../../../components/layout/UserAvatar'
 import {
   DepartmentFormSchema,
@@ -128,18 +129,15 @@ export function DepartmentFormModal({
               className="h-10 w-full rounded-md border border-border bg-surface pl-9 pr-3 text-sm text-primary placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
             />
           </div>
-          <select
-            className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm"
-            value={headEmployeeId}
-            onChange={(e) => setValue('headEmployeeId', e.target.value)}
-          >
-            <option value="">No department head</option>
-            {filteredEmployees.map((emp) => (
-              <option key={emp.id} value={emp.id}>
-                {emp.name}
-              </option>
-            ))}
-          </select>
+          <Select
+            value={headEmployeeId ?? ''}
+            onChange={(v) => setValue('headEmployeeId', v, { shouldValidate: true })}
+            placeholder="No department head"
+            options={[
+              { value: '', label: 'No department head' },
+              ...filteredEmployees.map((emp) => ({ value: emp.id, label: emp.name })),
+            ]}
+          />
         </div>
       </form>
     </Modal>

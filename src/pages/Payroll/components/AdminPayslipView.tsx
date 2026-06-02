@@ -2,6 +2,7 @@ import { Check, Download, Eye, Search } from 'lucide-react'
 import { PermissionGate } from '../../../components/shared/PermissionGate'
 import { ConfirmDialog } from '../../../components/shared/ConfirmDialog'
 import { Button } from '../../../components/ui/Button'
+import { Select } from '../../../components/ui/Select'
 import { EmployeePagination } from '../../Employees/components/EmployeePagination'
 import { MonthYearPicker } from '../../Attendance/components/AttendanceFilters'
 import { formatCurrency } from '../../../utils/currency.utils'
@@ -56,29 +57,24 @@ export function AdminPayslipView() {
             className="h-10 w-full rounded-md border border-border bg-surface pl-9 pr-3 text-sm"
           />
         </div>
-        <select
+        <Select
           value={vm.selectedDepartment}
-          onChange={(e) => vm.setSelectedDepartment(e.target.value)}
-          className="h-10 rounded-md border border-border bg-surface px-3 text-sm"
-        >
-          <option value="">All Departments</option>
-          {vm.departments.map((d) => (
-            <option key={d.id} value={d.id}>
-              {d.name}
-            </option>
-          ))}
-        </select>
-        <select
+          onChange={vm.setSelectedDepartment}
+          placeholder="All Departments"
+          className="lg:w-52"
+          options={[
+            { value: '', label: 'All Departments' },
+            ...vm.departments.map((d) => ({ value: d.id, label: d.name })),
+          ]}
+        />
+        <Select
           value={vm.selectedStatus}
-          onChange={(e) => vm.setSelectedStatus(e.target.value as PayslipStatus | '')}
-          className="h-10 rounded-md border border-border bg-surface px-3 text-sm"
-        >
-          {STATUS_OPTIONS.map((opt) => (
-            <option key={opt.label} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+          onChange={(value) => vm.setSelectedStatus(value as PayslipStatus | '')}
+          options={STATUS_OPTIONS}
+          placeholder="All Statuses"
+          searchable={false}
+          className="lg:w-44"
+        />
       </div>
 
       {vm.isLoading ? (

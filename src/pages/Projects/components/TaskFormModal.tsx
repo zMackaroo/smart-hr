@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import {
   TaskFormSchema,
   TASK_STATUS_LABELS,
@@ -45,7 +46,7 @@ export function TaskFormModal({
     },
   })
 
-  const { register, handleSubmit, reset } = form
+  const { register, handleSubmit, reset, watch, setValue } = form
 
   useEffect(() => {
     if (!isOpen) return
@@ -88,16 +89,15 @@ export function TaskFormModal({
       }
     >
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Project</label>
-          <select className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm" {...register('projectId')}>
-            {projects.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Project"
+          value={watch('projectId')}
+          onChange={(v) => setValue('projectId', v, { shouldValidate: true })}
+          options={projects.map((project) => ({
+            value: project.id,
+            label: project.name,
+          }))}
+        />
         <Input label="Title" {...register('title')} />
         <div>
           <label className="mb-1 block text-sm font-medium text-primary">Description</label>
@@ -106,28 +106,30 @@ export function TaskFormModal({
             {...register('description')}
           />
         </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Assignee</label>
-          <select className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm" {...register('assigneeId')}>
-            <option value="">Unassigned</option>
-            {employees.map((employee) => (
-              <option key={employee.id} value={employee.id}>
-                {employee.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Assignee"
+          value={watch('assigneeId') ?? ''}
+          onChange={(v) => setValue('assigneeId', v, { shouldValidate: true })}
+          placeholder="Unassigned"
+          options={[
+            { value: '', label: 'Unassigned' },
+            ...employees.map((employee) => ({
+              value: employee.id,
+              label: employee.name,
+            })),
+          ]}
+        />
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-primary">Status</label>
-            <select className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm" {...register('status')}>
-              {(Object.keys(TASK_STATUS_LABELS) as TaskStatus[]).map((status) => (
-                <option key={status} value={status}>
-                  {TASK_STATUS_LABELS[status]}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label="Status"
+            value={watch('status')}
+            onChange={(v) => setValue('status', v as TaskStatus, { shouldValidate: true })}
+            searchable={false}
+            options={(Object.keys(TASK_STATUS_LABELS) as TaskStatus[]).map((status) => ({
+              value: status,
+              label: TASK_STATUS_LABELS[status],
+            }))}
+          />
           <Input label="Due Date" type="date" {...register('dueDate')} />
         </div>
       </form>

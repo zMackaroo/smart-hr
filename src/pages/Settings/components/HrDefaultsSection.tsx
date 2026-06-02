@@ -1,28 +1,31 @@
-import type { UseFormRegister, FieldErrors } from 'react-hook-form'
+import type { FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from 'react-hook-form'
 import { Input } from '../../../components/ui/Input'
+import { Select } from '../../../components/ui/Select'
 import type { CompanySettingsFormInput } from '../../../types/company.types'
 
 interface HrDefaultsSectionProps {
   register: UseFormRegister<CompanySettingsFormInput>
+  watch: UseFormWatch<CompanySettingsFormInput>
+  setValue: UseFormSetValue<CompanySettingsFormInput>
   errors: FieldErrors<CompanySettingsFormInput>
 }
 
-export function HrDefaultsSection({ register, errors }: HrDefaultsSectionProps) {
-  const selectClass =
-    'h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25'
-
+export function HrDefaultsSection({ register, watch, setValue, errors }: HrDefaultsSectionProps) {
   return (
     <section className="rounded-lg border border-border/70 bg-surface p-6 shadow-card">
       <h2 className="mb-4 text-base font-semibold text-primary">HR Defaults</h2>
       <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Work Week</label>
-          <select className={selectClass} {...register('workWeek')}>
-            <option value="mon_fri">Monday – Friday</option>
-            <option value="mon_sat">Monday – Saturday</option>
-            <option value="custom">Custom</option>
-          </select>
-        </div>
+        <Select
+          label="Work Week"
+          value={watch('workWeek')}
+          onChange={(v) => setValue('workWeek', v as CompanySettingsFormInput['workWeek'], { shouldValidate: true })}
+          searchable={false}
+          options={[
+            { value: 'mon_fri', label: 'Monday – Friday' },
+            { value: 'mon_sat', label: 'Monday – Saturday' },
+            { value: 'custom', label: 'Custom' },
+          ]}
+        />
 
         <Input
           label="Standard Work Hours (per day)"

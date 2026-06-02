@@ -3,6 +3,7 @@ import { PermissionGate } from '../../components/shared/PermissionGate'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Button } from '../../components/ui/Button'
 import { EmptyState } from '../../components/shared/EmptyState'
+import { Select } from '../../components/ui/Select'
 import { EmployeePagination } from '../Employees/components/EmployeePagination'
 import { DeleteJobModal } from './components/DeleteJobModal'
 import { JobCard } from './components/JobCard'
@@ -19,9 +20,6 @@ const STATUS_TABS: Array<{ label: string; value: JobStatus | '' }> = [
 
 export function JobsPage() {
   const vm = useJobsPageViewModel()
-
-  const selectClass =
-    'h-10 rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25'
 
   return (
     <>
@@ -53,18 +51,16 @@ export function JobsPage() {
           />
         </div>
 
-        <select
+        <Select
           value={vm.selectedDepartment}
-          onChange={(e) => vm.setSelectedDepartment(e.target.value)}
-          className={selectClass}
-        >
-          <option value="">All Departments</option>
-          {vm.departments.map((d) => (
-            <option key={d.id} value={d.id}>
-              {d.name}
-            </option>
-          ))}
-        </select>
+          onChange={vm.setSelectedDepartment}
+          placeholder="All Departments"
+          className="lg:w-52"
+          options={[
+            { value: '', label: 'All Departments' },
+            ...vm.departments.map((d) => ({ value: d.id, label: d.name })),
+          ]}
+        />
       </div>
 
       <div className="mb-6 flex flex-wrap gap-2">

@@ -30,7 +30,7 @@ export function EmployeeDashboard() {
   if (isLoading || !data) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <StatCardSkeleton key={i} />
           ))}
@@ -53,7 +53,7 @@ export function EmployeeDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 xl:grid-cols-4">
         <StatCard {...stats.attendanceThisMonth} icon={Clock} tint="blue" />
         <StatCard {...stats.leavesBalance} icon={Calendar} tint="green" />
         <StatCard {...stats.pendingLeaves} icon={AlertCircle} tint="orange" />

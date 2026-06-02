@@ -1,6 +1,7 @@
 import { Briefcase, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { PermissionGate } from '../../components/shared/PermissionGate'
 import { Button } from '../../components/ui/Button'
+import { Select } from '../../components/ui/Select'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { EmptyState } from '../../components/shared/EmptyState'
 import { formatDate } from '../../utils/date.utils'
@@ -40,18 +41,16 @@ export function DesignationsPage() {
             className="h-10 w-full rounded-md border border-border bg-surface pl-9 pr-3 text-sm text-primary placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
           />
         </div>
-        <select
+        <Select
           value={vm.selectedDepartmentFilter}
-          onChange={(e) => vm.setSelectedDepartmentFilter(e.target.value)}
-          className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
-        >
-          <option value="">All Departments</option>
-          {vm.departments.map((dept) => (
-            <option key={dept.id} value={dept.id}>
-              {dept.name}
-            </option>
-          ))}
-        </select>
+          onChange={vm.setSelectedDepartmentFilter}
+          placeholder="All Departments"
+          className="sm:w-52"
+          options={[
+            { value: '', label: 'All Departments' },
+            ...vm.departments.map((dept) => ({ value: dept.id, label: dept.name })),
+          ]}
+        />
       </div>
 
       {vm.isLoading ? (

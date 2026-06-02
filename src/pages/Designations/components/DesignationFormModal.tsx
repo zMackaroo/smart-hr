@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import type { Department } from '../../../types/department.types'
 import {
   DesignationFormSchema,
@@ -40,6 +41,8 @@ export function DesignationFormModal({
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = form
 
@@ -73,20 +76,16 @@ export function DesignationFormModal({
     >
       <form className="space-y-4">
         <Input label="Designation Name" error={errors.name?.message} {...register('name')} />
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Department (optional)</label>
-          <select
-            className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm"
-            {...register('departmentId')}
-          >
-            <option value="">No department</option>
-            {departments.map((dept) => (
-              <option key={dept.id} value={dept.id}>
-                {dept.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Department (optional)"
+          value={watch('departmentId') ?? ''}
+          onChange={(v) => setValue('departmentId', v, { shouldValidate: true })}
+          placeholder="No department"
+          options={[
+            { value: '', label: 'No department' },
+            ...departments.map((dept) => ({ value: dept.id, label: dept.name })),
+          ]}
+        />
       </form>
     </Modal>
   )

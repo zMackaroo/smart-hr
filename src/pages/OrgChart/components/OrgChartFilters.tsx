@@ -1,4 +1,5 @@
 import { Button } from '../../../components/ui/Button'
+import { Select, selectTriggerClassName } from '../../../components/ui/Select'
 
 interface OrgChartFiltersProps {
   searchQuery: string
@@ -11,9 +12,6 @@ interface OrgChartFiltersProps {
   onExpandAll: () => void
   onCollapseAll: () => void
 }
-
-const selectClassName =
-  'h-10 rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20'
 
 export function OrgChartFilters({
   searchQuery,
@@ -34,20 +32,20 @@ export function OrgChartFilters({
           value={searchQuery}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search employee..."
-          className={selectClassName + ' sm:col-span-2 xl:col-span-1'}
+          className={selectTriggerClassName + ' sm:col-span-2 xl:col-span-1'}
         />
-        <select
+        <Select
           value={departmentFilter}
-          onChange={(event) => onDepartmentChange(event.target.value)}
-          className={selectClassName}
-        >
-          <option value="">All Departments</option>
-          {departments.map((department) => (
-            <option key={department.id} value={department.id}>
-              {department.name}
-            </option>
-          ))}
-        </select>
+          onChange={onDepartmentChange}
+          options={[
+            { value: '', label: 'All Departments' },
+            ...departments.map((department) => ({
+              value: department.id,
+              label: department.name,
+            })),
+          ]}
+          placeholder="All Departments"
+        />
         <label className="flex h-10 items-center gap-2 rounded-md border border-border bg-surface px-3 text-sm text-primary">
           <input
             type="checkbox"

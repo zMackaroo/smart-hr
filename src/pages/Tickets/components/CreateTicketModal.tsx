@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import {
   CreateTicketFormSchema,
   CATEGORY_LABELS,
@@ -42,6 +43,8 @@ export function CreateTicketModal({
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = form
 
@@ -50,9 +53,6 @@ export function CreateTicketModal({
       reset({ subject: '', description: '', category: 'general', priority: 'medium' })
     }
   }, [isOpen, reset])
-
-  const selectClass =
-    'h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25'
 
   return (
     <Modal
@@ -74,27 +74,27 @@ export function CreateTicketModal({
       <form className="space-y-4">
         <Input label="Subject" error={errors.subject?.message} {...register('subject')} />
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Category</label>
-          <select className={selectClass} {...register('category')}>
-            {CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>
-                {CATEGORY_LABELS[cat]}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Category"
+          value={watch('category')}
+          onChange={(v) => setValue('category', v as TicketCategory, { shouldValidate: true })}
+          searchable={false}
+          options={CATEGORIES.map((cat) => ({
+            value: cat,
+            label: CATEGORY_LABELS[cat],
+          }))}
+        />
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Priority</label>
-          <select className={selectClass} {...register('priority')}>
-            {PRIORITIES.map((p) => (
-              <option key={p} value={p}>
-                {p.charAt(0).toUpperCase() + p.slice(1)}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Priority"
+          value={watch('priority')}
+          onChange={(v) => setValue('priority', v as TicketPriority, { shouldValidate: true })}
+          searchable={false}
+          options={PRIORITIES.map((p) => ({
+            value: p,
+            label: p.charAt(0).toUpperCase() + p.slice(1),
+          }))}
+        />
 
         <div>
           <label className="mb-1 block text-sm font-medium text-primary">Description</label>

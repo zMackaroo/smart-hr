@@ -1,4 +1,5 @@
 import { Search } from 'lucide-react'
+import { Select } from '../../../components/ui/Select'
 import type { AttendanceStatus } from '../../../types/attendance.types'
 import type { Department } from '../../../types/department.types'
 
@@ -75,51 +76,41 @@ export function AttendanceFilters({
           />
         </div>
       )}
-      <select
+      <Select
         value={selectedDepartment}
-        onChange={(e) => onDepartmentChange(e.target.value)}
-        className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
-      >
-        <option value="">All Departments</option>
-        {departments.map((dept) => (
-          <option key={dept.id} value={dept.id}>
-            {dept.name}
-          </option>
-        ))}
-      </select>
-      <select
+        onChange={onDepartmentChange}
+        options={[
+          { value: '', label: 'All Departments' },
+          ...departments.map((dept) => ({ value: dept.id, label: dept.name })),
+        ]}
+        placeholder="All Departments"
+        className="xl:w-52"
+      />
+      <Select
         value={selectedStatus}
-        onChange={(e) => onStatusChange(e.target.value as AttendanceStatus | '')}
-        className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
-      >
-        {STATUS_OPTIONS.map((opt) => (
-          <option key={opt.label} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-      <select
-        value={selectedMonth}
-        onChange={(e) => onMonthChange(Number(e.target.value))}
-        className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
-      >
-        {MONTHS.map((label, index) => (
-          <option key={label} value={index + 1}>
-            {label}
-          </option>
-        ))}
-      </select>
-      <select
-        value={selectedYear}
-        onChange={(e) => onYearChange(Number(e.target.value))}
-        className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
-      >
-        {years.map((year) => (
-          <option key={year} value={year}>
-            {year}
-          </option>
-        ))}
-      </select>
+        onChange={(value) => onStatusChange(value as AttendanceStatus | '')}
+        options={STATUS_OPTIONS}
+        placeholder="All Statuses"
+        searchable={false}
+        className="xl:w-44"
+      />
+      <Select
+        value={String(selectedMonth)}
+        onChange={(value) => onMonthChange(Number(value))}
+        options={MONTHS.map((label, index) => ({
+          value: String(index + 1),
+          label,
+        }))}
+        searchable={false}
+        className="xl:w-40"
+      />
+      <Select
+        value={String(selectedYear)}
+        onChange={(value) => onYearChange(Number(value))}
+        options={years.map((year) => ({ value: String(year), label: String(year) }))}
+        searchable={false}
+        className="xl:w-28"
+      />
     </div>
   )
 }
@@ -153,28 +144,23 @@ export function MonthYearPicker({
 
   return (
     <div className="flex items-center gap-2">
-      <select
-        value={selectedMonth}
-        onChange={(e) => onMonthChange(Number(e.target.value))}
-        className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
-      >
-        {months.map((label, index) => (
-          <option key={label} value={index + 1}>
-            {label}
-          </option>
-        ))}
-      </select>
-      <select
-        value={selectedYear}
-        onChange={(e) => onYearChange(Number(e.target.value))}
-        className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
-      >
-        {years.map((year) => (
-          <option key={year} value={year}>
-            {year}
-          </option>
-        ))}
-      </select>
+      <Select
+        value={String(selectedMonth)}
+        onChange={(value) => onMonthChange(Number(value))}
+        options={months.map((label, index) => ({
+          value: String(index + 1),
+          label,
+        }))}
+        searchable={false}
+        className="w-24"
+      />
+      <Select
+        value={String(selectedYear)}
+        onChange={(value) => onYearChange(Number(value))}
+        options={years.map((year) => ({ value: String(year), label: String(year) }))}
+        searchable={false}
+        className="w-24"
+      />
     </div>
   )
 }

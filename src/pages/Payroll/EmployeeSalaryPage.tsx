@@ -5,6 +5,7 @@ import { EmptyState } from '../../components/shared/EmptyState'
 import { UserAvatar } from '../../components/layout/UserAvatar'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Button } from '../../components/ui/Button'
+import { Select } from '../../components/ui/Select'
 import { EmployeePagination } from '../Employees/components/EmployeePagination'
 import { formatCurrency } from '../../utils/currency.utils'
 import { formatDate } from '../../utils/date.utils'
@@ -44,18 +45,16 @@ export function EmployeeSalaryPage() {
             className="h-10 w-full rounded-md border border-border bg-surface pl-9 pr-3 text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
           />
         </div>
-        <select
+        <Select
           value={vm.selectedDepartment}
-          onChange={(e) => vm.setSelectedDepartment(e.target.value)}
-          className="h-10 rounded-md border border-border bg-surface px-3 text-sm"
-        >
-          <option value="">All Departments</option>
-          {vm.departments.map((d) => (
-            <option key={d.id} value={d.id}>
-              {d.name}
-            </option>
-          ))}
-        </select>
+          onChange={vm.setSelectedDepartment}
+          placeholder="All Departments"
+          className="lg:w-52"
+          options={[
+            { value: '', label: 'All Departments' },
+            ...vm.departments.map((d) => ({ value: d.id, label: d.name })),
+          ]}
+        />
       </div>
 
       <p className="mb-4 text-sm text-secondary">Showing {vm.salaries.length} of {vm.total} records</p>

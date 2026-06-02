@@ -1,7 +1,9 @@
 import { Search } from 'lucide-react'
 import { EmptyState } from '../../../components/shared/EmptyState'
+import { Select, selectTriggerClassName } from '../../../components/ui/Select'
 import { EmployeePagination } from '../../Employees/components/EmployeePagination'
 import { CATEGORY_LABELS, type TicketCategory, type TicketPriority, type TicketStatus } from '../../../types/ticket.types'
+import { TicketSummaryCards } from './TicketSummaryCards'
 import { TicketTableRow } from './TicketTableRow'
 import { useAdminTicketsViewModel } from './AdminTicketsView.viewmodel'
 
@@ -32,95 +34,76 @@ const CATEGORY_OPTIONS: Array<{ label: string; value: TicketCategory | '' }> = [
 export function AdminTicketsView() {
   const vm = useAdminTicketsViewModel()
 
-  const selectClass =
-    'h-10 rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25'
-
-  const summaryCards = [
-    { label: 'Open', count: vm.statusCounts.open, className: 'text-info' },
-    { label: 'In Progress', count: vm.statusCounts.inProgress, className: 'text-warning' },
-    { label: 'Resolved', count: vm.statusCounts.resolved, className: 'text-success' },
-    { label: 'Closed', count: vm.statusCounts.closed, className: 'text-muted' },
-  ]
-
   return (
     <>
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {summaryCards.map((card) => (
-          <div
-            key={card.label}
-            className="rounded-lg border border-border/70 bg-surface p-4 shadow-card"
-          >
-            <p className="text-xs font-medium uppercase tracking-wide text-muted">{card.label}</p>
-            <p className={`mt-1 text-2xl font-semibold ${card.className}`}>{card.count}</p>
+      <TicketSummaryCards counts={vm.statusCounts} isLoading={vm.isLoading} />
+
+      <div className="mb-6 rounded-lg border border-border/70 bg-surface p-4 shadow-card">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-12 xl:items-end">
+          <div className="sm:col-span-2 xl:col-span-4">
+            <label htmlFor="ticket-search" className="mb-1 block text-sm font-medium text-primary">
+              Search
+            </label>
+            <div className="relative">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
+                strokeWidth={1.5}
+              />
+              <input
+                id="ticket-search"
+                type="search"
+                value={vm.searchQuery}
+                onChange={(e) => vm.setSearchQuery(e.target.value)}
+                placeholder="Subject, ticket #, or creator..."
+                className={selectTriggerClassName + ' pl-9'}
+              />
+            </div>
           </div>
-        ))}
-      </div>
 
-      <div className="mb-6 flex flex-col gap-4">
-        <div className="relative max-w-md">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
-            strokeWidth={1.5}
-          />
-          <input
-            type="search"
-            value={vm.searchQuery}
-            onChange={(e) => vm.setSearchQuery(e.target.value)}
-            placeholder="Search subject, ticket #, or creator..."
-            className="h-10 w-full rounded-md border border-border bg-surface pl-9 pr-3 text-sm text-primary placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25"
-          />
-        </div>
-
-        <div className="flex flex-wrap gap-3">
-          <select
+          <Select
+            label="Status"
             value={vm.selectedStatus}
-            onChange={(e) => vm.setSelectedStatus(e.target.value as TicketStatus | '')}
-            className={selectClass}
-          >
-            {STATUS_OPTIONS.map((opt) => (
-              <option key={opt.label} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => vm.setSelectedStatus(value as TicketStatus | '')}
+            options={STATUS_OPTIONS}
+            placeholder="All Statuses"
+            searchable={false}
+            className="xl:col-span-2"
+          />
 
-          <select
+          <Select
+            label="Priority"
             value={vm.selectedPriority}
-            onChange={(e) => vm.setSelectedPriority(e.target.value as TicketPriority | '')}
-            className={selectClass}
-          >
-            {PRIORITY_OPTIONS.map((opt) => (
-              <option key={opt.label} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => vm.setSelectedPriority(value as TicketPriority | '')}
+            options={PRIORITY_OPTIONS}
+            placeholder="All Priorities"
+            searchable={false}
+            className="xl:col-span-2"
+          />
 
-          <select
+          <Select
+            label="Category"
             value={vm.selectedCategory}
-            onChange={(e) => vm.setSelectedCategory(e.target.value as TicketCategory | '')}
-            className={selectClass}
-          >
-            {CATEGORY_OPTIONS.map((opt) => (
-              <option key={opt.label} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => vm.setSelectedCategory(value as TicketCategory | '')}
+            options={CATEGORY_OPTIONS}
+            placeholder="All Categories"
+            className="xl:col-span-2"
+          />
 
-          <select
+          <Select
+            label="Assignee"
             value={vm.selectedAssignee}
-            onChange={(e) => vm.setSelectedAssignee(e.target.value)}
-            className={selectClass}
-          >
-            <option value="">All Assignees</option>
-            <option value="__unassigned__">Unassigned</option>
-            {vm.assignees.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
-            ))}
-          </select>
+            onChange={vm.setSelectedAssignee}
+            options={[
+              { value: '', label: 'All Assignees' },
+              { value: '__unassigned__', label: 'Unassigned' },
+              ...vm.assignees.map((assignee) => ({
+                value: assignee.id,
+                label: assignee.name,
+              })),
+            ]}
+            placeholder="All Assignees"
+            className="xl:col-span-2"
+          />
         </div>
       </div>
 

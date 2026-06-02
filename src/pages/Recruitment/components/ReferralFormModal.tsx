@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import {
   ReferralFormSchema,
   type JobPosting,
@@ -41,6 +42,8 @@ export function ReferralFormModal({
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = form
 
@@ -55,9 +58,6 @@ export function ReferralFormModal({
       notes: '',
     })
   }, [isOpen, jobs, reset])
-
-  const selectClass =
-    'h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25'
 
   return (
     <Modal
@@ -93,18 +93,17 @@ export function ReferralFormModal({
           {...register('candidatePhone')}
         />
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Job</label>
-          <select className={selectClass} {...register('jobId')}>
-            <option value="">Select open job</option>
-            {jobs.map((j) => (
-              <option key={j.id} value={j.id}>
-                {j.title}
-              </option>
-            ))}
-          </select>
-          {errors.jobId && <p className="mt-1 text-xs text-error">{errors.jobId.message}</p>}
-        </div>
+        <Select
+          label="Job"
+          value={watch('jobId')}
+          onChange={(v) => setValue('jobId', v, { shouldValidate: true })}
+          error={errors.jobId?.message}
+          placeholder="Select open job"
+          options={[
+            { value: '', label: 'Select open job' },
+            ...jobs.map((j) => ({ value: j.id, label: j.title })),
+          ]}
+        />
 
         <Input
           label="Relationship"

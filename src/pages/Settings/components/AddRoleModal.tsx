@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import { CreateRoleSchema, type CreateRoleInput, type Role } from '../../../types/permission.types'
 
 interface AddRoleModalProps {
@@ -33,6 +34,8 @@ export function AddRoleModal({
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = form
 
@@ -76,25 +79,13 @@ export function AddRoleModal({
           {...register('description')}
         />
 
-        <div>
-          <label htmlFor="clone-from-role" className="mb-1 block text-sm font-medium text-primary">
-            Clone permissions from
-          </label>
-          <select
-            id="clone-from-role"
-            className="h-10 w-full rounded border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-            {...register('cloneFromRoleId')}
-          >
-            {roles.map((role) => (
-              <option key={role.id} value={role.id}>
-                {role.name}
-              </option>
-            ))}
-          </select>
-          {errors.cloneFromRoleId?.message && (
-            <p className="mt-1 text-xs text-error">{errors.cloneFromRoleId.message}</p>
-          )}
-        </div>
+        <Select
+          label="Clone permissions from"
+          value={watch('cloneFromRoleId')}
+          onChange={(v) => setValue('cloneFromRoleId', v, { shouldValidate: true })}
+          error={errors.cloneFromRoleId?.message}
+          options={roles.map((role) => ({ value: role.id, label: role.name }))}
+        />
       </form>
     </Modal>
   )

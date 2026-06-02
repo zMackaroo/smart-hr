@@ -1,4 +1,6 @@
+import { Search } from 'lucide-react'
 import { EXPENSE_CATEGORIES, CATEGORY_LABELS, type ExpenseCategory, type ExpenseStatus } from '../../../types/expense.types'
+import { Select, selectTriggerClassName } from '../../../components/ui/Select'
 import { EmployeePagination } from '../../Employees/components/EmployeePagination'
 import { ExpenseClaimTableRow } from './ExpenseClaimTableRow'
 import { ExpenseDetailModal } from './ExpenseDetailModal'
@@ -15,9 +17,6 @@ const STATUS_OPTIONS: Array<{ value: ExpenseStatus | ''; label: string }> = [
   { value: 'cancelled', label: 'Cancelled' },
 ]
 
-const selectClassName =
-  'h-10 rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20'
-
 export function AdminExpensesView() {
   const vm = useAdminExpensesViewModel()
 
@@ -25,59 +24,83 @@ export function AdminExpensesView() {
     <>
       <ExpenseSummaryCards summary={vm.summary} isLoading={vm.isLoading} />
 
-      <div className="mb-4 grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
-        <input
-          type="search"
-          value={vm.searchQuery}
-          onChange={(event) => vm.setSearchQuery(event.target.value)}
-          placeholder="Search title, claim #, employee..."
-          className={selectClassName + ' w-full xl:col-span-2'}
-        />
-        <select
-          value={vm.statusFilter}
-          onChange={(event) => vm.setStatusFilter(event.target.value as ExpenseStatus | '')}
-          className={selectClassName}
-        >
-          {STATUS_OPTIONS.map((option) => (
-            <option key={option.label} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <select
-          value={vm.categoryFilter}
-          onChange={(event) => vm.setCategoryFilter(event.target.value as ExpenseCategory | '')}
-          className={selectClassName}
-        >
-          <option value="">All Categories</option>
-          {EXPENSE_CATEGORIES.map((category) => (
-            <option key={category} value={category}>
-              {CATEGORY_LABELS[category]}
-            </option>
-          ))}
-        </select>
-        <select
-          value={vm.departmentFilter}
-          onChange={(event) => vm.setDepartmentFilter(event.target.value)}
-          className={selectClassName}
-        >
-          <option value="">All Departments</option>
-          {vm.departments.map((department) => (
-            <option key={department.id} value={department.id}>
-              {department.name}
-            </option>
-          ))}
-        </select>
-        <InputDate
-          label="From"
-          value={vm.dateFrom}
-          onChange={vm.setDateFrom}
-        />
-        <InputDate
-          label="To"
-          value={vm.dateTo}
-          onChange={vm.setDateTo}
-        />
+      <div className="mb-4 rounded-lg border border-border/70 bg-surface p-4 shadow-card">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-12 xl:items-end">
+          <div className="sm:col-span-2 xl:col-span-4">
+            <label htmlFor="expense-search" className="mb-1 block text-sm font-medium text-primary">
+              Search
+            </label>
+            <div className="relative">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
+                strokeWidth={1.5}
+              />
+              <input
+                id="expense-search"
+                type="search"
+                value={vm.searchQuery}
+                onChange={(event) => vm.setSearchQuery(event.target.value)}
+                placeholder="Title, claim #, employee..."
+                className={selectTriggerClassName + ' pl-9'}
+              />
+            </div>
+          </div>
+
+          <Select
+            label="Status"
+            value={vm.statusFilter}
+            onChange={(value) => vm.setStatusFilter(value as ExpenseStatus | '')}
+            options={STATUS_OPTIONS}
+            placeholder="All Statuses"
+            searchable={false}
+            className="xl:col-span-2"
+          />
+
+          <Select
+            label="Category"
+            value={vm.categoryFilter}
+            onChange={(value) => vm.setCategoryFilter(value as ExpenseCategory | '')}
+            placeholder="All Categories"
+            searchable={false}
+            options={[
+              { value: '', label: 'All Categories' },
+              ...EXPENSE_CATEGORIES.map((category) => ({
+                value: category,
+                label: CATEGORY_LABELS[category],
+              })),
+            ]}
+            className="xl:col-span-2"
+          />
+
+          <Select
+            label="Department"
+            value={vm.departmentFilter}
+            onChange={vm.setDepartmentFilter}
+            placeholder="All Departments"
+            options={[
+              { value: '', label: 'All Departments' },
+              ...vm.departments.map((department) => ({
+                value: department.id,
+                label: department.name,
+              })),
+            ]}
+            className="xl:col-span-2"
+          />
+
+          <InputDate
+            label="From"
+            value={vm.dateFrom}
+            onChange={vm.setDateFrom}
+            className="xl:col-span-1"
+          />
+
+          <InputDate
+            label="To"
+            value={vm.dateTo}
+            onChange={vm.setDateTo}
+            className="xl:col-span-1"
+          />
+        </div>
       </div>
 
       {vm.isLoading ? (
@@ -168,19 +191,21 @@ function InputDate({
   label,
   value,
   onChange,
+  className,
 }: {
   label: string
   value: string
   onChange: (value: string) => void
+  className?: string
 }) {
   return (
-    <div>
-      <label className="mb-1 block text-xs font-medium text-secondary">{label}</label>
+    <div className={className}>
+      <label className="mb-1 block text-sm font-medium text-primary">{label}</label>
       <input
         type="date"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+        className={selectTriggerClassName}
       />
     </div>
   )

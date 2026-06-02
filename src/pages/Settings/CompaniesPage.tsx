@@ -1,6 +1,7 @@
 import { Plus } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
+import { Select } from '../../components/ui/Select'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Badge } from '../../components/ui/Badge'
 import { PLAN_LABELS, STATUS_LABELS, type CompanyFormInput } from '../../types/companies.types'
@@ -118,38 +119,20 @@ export function CompaniesPage() {
             />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-primary">Plan</label>
-              <select
-                className={inputClass}
-                value={vm.form.plan}
-                onChange={(event) =>
-                  vm.updateField('plan', event.target.value as CompanyFormInput['plan'])
-                }
-              >
-                {vm.planOptions.map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-primary">Status</label>
-              <select
-                className={inputClass}
-                value={vm.form.status}
-                onChange={(event) =>
-                  vm.updateField('status', event.target.value as CompanyFormInput['status'])
-                }
-              >
-                {vm.statusOptions.map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Select
+              label="Plan"
+              value={vm.form.plan}
+              onChange={(v) => vm.updateField('plan', v as CompanyFormInput['plan'])}
+              searchable={false}
+              options={vm.planOptions.map(([value, label]) => ({ value, label }))}
+            />
+            <Select
+              label="Status"
+              value={vm.form.status}
+              onChange={(v) => vm.updateField('status', v as CompanyFormInput['status'])}
+              searchable={false}
+              options={vm.statusOptions.map(([value, label]) => ({ value, label }))}
+            />
           </div>
         </div>
       </Modal>

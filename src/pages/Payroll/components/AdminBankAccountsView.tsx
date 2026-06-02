@@ -2,6 +2,7 @@ import { Plus } from 'lucide-react'
 import { PermissionGate } from '../../../components/shared/PermissionGate'
 import { Button } from '../../../components/ui/Button'
 import { ConfirmDialog } from '../../../components/shared/ConfirmDialog'
+import { Select, selectTriggerClassName } from '../../../components/ui/Select'
 import type { BankAccountStatus } from '../../../types/bank-account.types'
 import { ACCOUNT_STATUS_LABELS } from '../../../types/bank-account.types'
 import { EmployeePagination } from '../../Employees/components/EmployeePagination'
@@ -19,8 +20,7 @@ const STATUS_OPTIONS: Array<{ value: BankAccountStatus | ''; label: string }> = 
   })),
 ]
 
-const selectClassName =
-  'h-10 rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20'
+const filterInputClassName = selectTriggerClassName
 
 interface AdminBankAccountsViewProps {
   onAddClick?: () => void
@@ -51,44 +51,44 @@ export function AdminBankAccountsView({ onAddClick }: AdminBankAccountsViewProps
           value={vm.searchQuery}
           onChange={(event) => vm.setSearchQuery(event.target.value)}
           placeholder="Search employee, bank, account..."
-          className={selectClassName + ' w-full xl:col-span-2'}
+          className={filterInputClassName + ' w-full xl:col-span-2'}
         />
-        <select
+        <Select
           value={vm.departmentFilter}
-          onChange={(event) => vm.setDepartmentFilter(event.target.value)}
-          className={selectClassName}
-        >
-          <option value="">All Departments</option>
-          {vm.departments.map((department) => (
-            <option key={department.id} value={department.id}>
-              {department.name}
-            </option>
-          ))}
-        </select>
-        <select
+          onChange={vm.setDepartmentFilter}
+          placeholder="All Departments"
+          options={[
+            { value: '', label: 'All Departments' },
+            ...vm.departments.map((department) => ({
+              value: department.id,
+              label: department.name,
+            })),
+          ]}
+        />
+        <Select
           value={vm.statusFilter}
-          onChange={(event) => vm.setStatusFilter(event.target.value as BankAccountStatus | '')}
-          className={selectClassName}
-        >
-          {STATUS_OPTIONS.map((option) => (
-            <option key={option.label} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+          onChange={(value) => vm.setStatusFilter(value as BankAccountStatus | '')}
+          options={STATUS_OPTIONS}
+          placeholder="All Statuses"
+          searchable={false}
+        />
         {vm.employeeFilter && (
-          <select
+          <Select
             value={vm.employeeFilter}
             onChange={() => undefined}
             disabled
-            className={selectClassName + ' xl:col-span-2'}
-          >
-            <option value={vm.employeeFilter}>
-              Filtered:{' '}
-              {vm.employees.find((employee) => employee.id === vm.employeeFilter)?.fullName ??
-                vm.employeeFilter}
-            </option>
-          </select>
+            searchable={false}
+            className="xl:col-span-2"
+            options={[
+              {
+                value: vm.employeeFilter,
+                label: `Filtered: ${
+                  vm.employees.find((employee) => employee.id === vm.employeeFilter)?.fullName ??
+                  vm.employeeFilter
+                }`,
+              },
+            ]}
+          />
         )}
       </div>
 

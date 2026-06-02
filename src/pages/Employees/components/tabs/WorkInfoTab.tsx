@@ -1,6 +1,7 @@
 import { Pencil } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '../../../../components/ui/Button'
+import { Select } from '../../../../components/ui/Select'
 import { formatDate } from '../../../../utils/date.utils'
 import type { EmployeeDetail } from '../../../../types/employee.types'
 
@@ -67,41 +68,39 @@ export function WorkInfoTab({ work, canEdit, onSave, isSaving }: WorkInfoTabProp
       ) : (
         <div className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-primary">Employee Type</label>
-              <select
-                className="h-10 w-full rounded-md border border-border px-3 text-sm"
-                value={form.employeeType}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    employeeType: e.target.value as EmployeeDetail['work']['employeeType'],
-                  })
-                }
-              >
-                <option value="full_time">Full Time</option>
-                <option value="part_time">Part Time</option>
-                <option value="contract">Contract</option>
-                <option value="intern">Intern</option>
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-primary">Work Location</label>
-              <select
-                className="h-10 w-full rounded-md border border-border px-3 text-sm"
-                value={form.workLocation}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    workLocation: e.target.value as EmployeeDetail['work']['workLocation'],
-                  })
-                }
-              >
-                <option value="office">Office</option>
-                <option value="remote">Remote</option>
-                <option value="hybrid">Hybrid</option>
-              </select>
-            </div>
+            <Select
+              label="Employee Type"
+              value={form.employeeType}
+              onChange={(v) =>
+                setForm({
+                  ...form,
+                  employeeType: v as EmployeeDetail['work']['employeeType'],
+                })
+              }
+              searchable={false}
+              options={[
+                { value: 'full_time', label: 'Full Time' },
+                { value: 'part_time', label: 'Part Time' },
+                { value: 'contract', label: 'Contract' },
+                { value: 'intern', label: 'Intern' },
+              ]}
+            />
+            <Select
+              label="Work Location"
+              value={form.workLocation}
+              onChange={(v) =>
+                setForm({
+                  ...form,
+                  workLocation: v as EmployeeDetail['work']['workLocation'],
+                })
+              }
+              searchable={false}
+              options={[
+                { value: 'office', label: 'Office' },
+                { value: 'remote', label: 'Remote' },
+                { value: 'hybrid', label: 'Hybrid' },
+              ]}
+            />
           </div>
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={() => setIsEditing(false)}>

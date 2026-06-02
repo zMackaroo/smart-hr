@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import {
   EXPENSE_CATEGORIES,
   SubmitExpenseFormSchema,
@@ -40,6 +41,7 @@ export function SubmitExpenseModal({
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors },
   } = form
 
@@ -73,22 +75,16 @@ export function SubmitExpenseModal({
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <Input label="Title" error={errors.title?.message} {...register('title')} />
 
-        <div>
-          <label htmlFor="expense-category" className="mb-1 block text-sm font-medium text-primary">
-            Category
-          </label>
-          <select
-            id="expense-category"
-            className="h-10 w-full rounded border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-            {...register('category')}
-          >
-            {EXPENSE_CATEGORIES.map((category) => (
-              <option key={category} value={category}>
-                {CATEGORY_LABELS[category]}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Category"
+          value={watch('category')}
+          onChange={(v) => setValue('category', v as SubmitExpenseFormInput['category'], { shouldValidate: true })}
+          searchable={false}
+          options={EXPENSE_CATEGORIES.map((category) => ({
+            value: category,
+            label: CATEGORY_LABELS[category],
+          }))}
+        />
 
         <Input
           label="Amount"

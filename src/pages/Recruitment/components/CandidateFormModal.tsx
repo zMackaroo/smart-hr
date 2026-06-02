@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import {
   CandidateFormSchema,
   type Candidate,
@@ -58,6 +59,8 @@ export function CandidateFormModal({
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = form
 
@@ -88,9 +91,6 @@ export function CandidateFormModal({
     }
   }, [isOpen, candidate, jobs, reset])
 
-  const selectClass =
-    'h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25'
-
   return (
     <Modal
       isOpen={isOpen}
@@ -112,18 +112,17 @@ export function CandidateFormModal({
         <Input label="Email" type="email" error={errors.email?.message} {...register('email')} />
         <Input label="Phone (optional)" error={errors.phone?.message} {...register('phone')} />
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Job</label>
-          <select className={selectClass} {...register('jobId')}>
-            <option value="">Select job</option>
-            {jobs.map((j) => (
-              <option key={j.id} value={j.id}>
-                {j.title}
-              </option>
-            ))}
-          </select>
-          {errors.jobId && <p className="mt-1 text-xs text-error">{errors.jobId.message}</p>}
-        </div>
+        <Select
+          label="Job"
+          value={watch('jobId')}
+          onChange={(v) => setValue('jobId', v, { shouldValidate: true })}
+          error={errors.jobId?.message}
+          placeholder="Select job"
+          options={[
+            { value: '', label: 'Select job' },
+            ...jobs.map((j) => ({ value: j.id, label: j.title })),
+          ]}
+        />
 
         <Input
           label="Experience (years)"
@@ -147,16 +146,16 @@ export function CandidateFormModal({
         </div>
 
         {isEdit && (
-          <div>
-            <label className="mb-1 block text-sm font-medium text-primary">Status</label>
-            <select className={selectClass} {...register('status')}>
-              {STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>
-                  {s.charAt(0).toUpperCase() + s.slice(1)}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label="Status"
+            value={watch('status')}
+            onChange={(v) => setValue('status', v as CandidateStatus, { shouldValidate: true })}
+            searchable={false}
+            options={STATUS_OPTIONS.map((s) => ({
+              value: s,
+              label: s.charAt(0).toUpperCase() + s.slice(1),
+            }))}
+          />
         )}
       </form>
     </Modal>

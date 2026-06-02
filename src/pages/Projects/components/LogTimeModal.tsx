@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import { TimeLogFormSchema, type Task, type TimeLogFormInput } from '../../../types/project.types'
 
 interface LogTimeModalProps {
@@ -33,7 +34,7 @@ export function LogTimeModal({
     },
   })
 
-  const { register, handleSubmit, reset } = form
+  const { register, handleSubmit, reset, watch, setValue } = form
 
   useEffect(() => {
     if (!isOpen) return
@@ -62,16 +63,15 @@ export function LogTimeModal({
       }
     >
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Task</label>
-          <select className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm" {...register('taskId')}>
-            {tasks.map((task) => (
-              <option key={task.id} value={task.id}>
-                {task.projectName} — {task.title}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Task"
+          value={watch('taskId')}
+          onChange={(v) => setValue('taskId', v, { shouldValidate: true })}
+          options={tasks.map((task) => ({
+            value: task.id,
+            label: `${task.projectName} — ${task.title}`,
+          }))}
+        />
         <Input label="Date" type="date" {...register('date')} />
         <Input label="Hours" type="number" step="0.25" min="0.25" max="24" {...register('hours', { valueAsNumber: true })} />
         <div>

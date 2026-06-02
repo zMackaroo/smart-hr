@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import { getManagerOptions } from '../../../api/employees.api'
 import { EmployeeFormSchema, type Employee, type EmployeeFormInput } from '../../../types/employee.types'
 import type { DepartmentOption, DesignationOption } from '../../../types/employee.types'
@@ -54,6 +55,7 @@ export function AddEditEmployeeModal({
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors },
   } = form
 
@@ -146,66 +148,50 @@ export function AddEditEmployeeModal({
 
         {activeTab === 'Work Details' && (
           <>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-primary">Department</label>
-              <select
-                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm"
-                {...register('departmentId')}
-              >
-                <option value="">Select department</option>
-                {departments.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
-              {errors.departmentId && (
-                <p className="mt-1 text-xs text-error">{errors.departmentId.message}</p>
-              )}
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-primary">Designation</label>
-              <select
-                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm"
-                {...register('designationId')}
-              >
-                <option value="">Select designation</option>
-                {filteredDesignations.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
-              {errors.designationId && (
-                <p className="mt-1 text-xs text-error">{errors.designationId.message}</p>
-              )}
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-primary">Role</label>
-              <select
-                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm"
-                {...register('role')}
-              >
-                <option value="employee">Employee</option>
-                <option value="hr_admin">HR Admin</option>
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-primary">Reporting Manager</label>
-              <select
-                className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm"
-                {...register('managerId')}
-              >
-                <option value="">None</option>
-                {managers
+            <Select
+              label="Department"
+              value={watch('departmentId')}
+              onChange={(v) => setValue('departmentId', v, { shouldValidate: true })}
+              error={errors.departmentId?.message}
+              placeholder="Select department"
+              options={[
+                { value: '', label: 'Select department' },
+                ...departments.map((d) => ({ value: d.id, label: d.name })),
+              ]}
+            />
+            <Select
+              label="Designation"
+              value={watch('designationId')}
+              onChange={(v) => setValue('designationId', v, { shouldValidate: true })}
+              error={errors.designationId?.message}
+              placeholder="Select designation"
+              options={[
+                { value: '', label: 'Select designation' },
+                ...filteredDesignations.map((d) => ({ value: d.id, label: d.name })),
+              ]}
+            />
+            <Select
+              label="Role"
+              value={watch('role')}
+              onChange={(v) => setValue('role', v as EmployeeFormInput['role'], { shouldValidate: true })}
+              searchable={false}
+              options={[
+                { value: 'employee', label: 'Employee' },
+                { value: 'hr_admin', label: 'HR Admin' },
+              ]}
+            />
+            <Select
+              label="Reporting Manager"
+              value={watch('managerId') ?? ''}
+              onChange={(v) => setValue('managerId', v, { shouldValidate: true })}
+              placeholder="None"
+              options={[
+                { value: '', label: 'None' },
+                ...managers
                   .filter((m) => m.id !== employee?.id)
-                  .map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
+                  .map((m) => ({ value: m.id, label: m.name })),
+              ]}
+            />
           </>
         )}
       </form>

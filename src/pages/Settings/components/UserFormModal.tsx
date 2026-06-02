@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import {
   UserFormSchema,
   type PlatformUser,
@@ -48,6 +49,8 @@ export function UserFormModal({
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = form
 
@@ -103,47 +106,30 @@ export function UserFormModal({
           {...register('email')}
         />
 
-        <div>
-          <label htmlFor="user-role" className="mb-1 block text-sm font-medium text-primary">
-            Role
-          </label>
-          <select
-            id="user-role"
-            className="h-10 w-full rounded border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-            {...register('roleId')}
-          >
-            {roles.map((role) => (
-              <option key={role.id} value={role.id}>
-                {role.name}
-                {!role.isSystem ? ' (Custom)' : ''}
-              </option>
-            ))}
-          </select>
-          {errors.roleId?.message && (
-            <p className="mt-1 text-xs text-error">{errors.roleId.message}</p>
-          )}
-        </div>
+        <Select
+          label="Role"
+          value={watch('roleId')}
+          onChange={(v) => setValue('roleId', v, { shouldValidate: true })}
+          error={errors.roleId?.message}
+          options={roles.map((role) => ({
+            value: role.id,
+            label: `${role.name}${!role.isSystem ? ' (Custom)' : ''}`,
+          }))}
+        />
 
-        <div>
-          <label
-            htmlFor="user-employee-link"
-            className="mb-1 block text-sm font-medium text-primary"
-          >
-            Link to Employee
-          </label>
-          <select
-            id="user-employee-link"
-            className="h-10 w-full rounded border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-            {...register('employeeId')}
-          >
-            <option value="">None</option>
-            {employees.map((employee) => (
-              <option key={employee.id} value={employee.id}>
-                {employee.name} ({employee.employeeId})
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Link to Employee"
+          value={watch('employeeId') ?? ''}
+          onChange={(v) => setValue('employeeId', v, { shouldValidate: true })}
+          placeholder="None"
+          options={[
+            { value: '', label: 'None' },
+            ...employees.map((employee) => ({
+              value: employee.id,
+              label: `${employee.name} (${employee.employeeId})`,
+            })),
+          ]}
+        />
 
         {!isEdit && (
           <label className="flex items-center gap-2 text-sm text-primary">

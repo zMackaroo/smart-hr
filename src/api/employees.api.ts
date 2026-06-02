@@ -23,6 +23,55 @@ import {
 const MOCK_DELAY_MS = 400
 
 const DETAIL_EXTRAS: Record<string, Omit<EmployeeDetail, keyof Employee>> = {
+  'usr-admin-1': {
+    personal: {
+      dateOfBirth: '1985-03-12',
+      gender: 'other',
+      maritalStatus: 'single',
+      nationality: 'American',
+      address: '500 HR Plaza',
+      city: 'New York',
+      country: 'USA',
+      emergencyContact: {
+        name: 'Alex Support',
+        relationship: 'Friend',
+        phone: '+1 555-0102',
+      },
+    },
+    work: {
+      employeeType: 'full_time',
+      workLocation: 'office',
+      shift: 'Day Shift (9 AM – 6 PM)',
+    },
+    documents: [
+      {
+        id: 'doc-admin-1',
+        name: 'HR Certification',
+        type: 'PDF',
+        uploadedAt: '2019-01-05',
+        url: '#',
+      },
+    ],
+    assets: [
+      {
+        id: 'asset-admin-1',
+        name: 'MacBook Air',
+        assetId: 'AST-2001',
+        category: 'Laptop',
+        assignedDate: '2019-01-10',
+        status: 'assigned',
+      },
+    ],
+    timeline: [
+      {
+        id: 'tl-admin-1',
+        event: 'Joined Company',
+        description: 'Appointed HR Admin',
+        date: '2019-01-01',
+        type: 'joined',
+      },
+    ],
+  },
   'usr-employee-1': {
     personal: {
       dateOfBirth: '1992-04-18',
@@ -124,9 +173,43 @@ function defaultDetailExtras(employee: Employee): Omit<EmployeeDetail, keyof Emp
 }
 
 function createMockEmployees(): EmployeeDetail[] {
-  const seeds: Array<Omit<Employee, 'id' | 'employeeId' | 'fullName' | 'companyId'> & { id?: string }> = [
+  const seeds: Array<
+    Omit<Employee, 'id' | 'employeeId' | 'fullName' | 'companyId'> & {
+      id?: string
+      employeeId?: string
+    }
+  > = [
+    {
+      id: 'usr-super-1',
+      employeeId: 'EMP-SUP',
+      firstName: 'Super',
+      lastName: 'Admin',
+      email: 'super@smarthr.com',
+      phone: '+1 555-0100',
+      department: { id: 'dept-2', name: 'HR' },
+      designation: { id: 'des-3', name: 'HR Manager' },
+      role: 'super_admin',
+      status: 'active',
+      joinDate: '2018-01-01',
+      location: 'New York',
+    },
+    {
+      id: 'usr-admin-1',
+      employeeId: 'EMP-HRA',
+      firstName: 'HR',
+      lastName: 'Admin',
+      email: 'admin@smarthr.com',
+      phone: '+1 555-0101',
+      department: { id: 'dept-2', name: 'HR' },
+      designation: { id: 'des-3', name: 'HR Manager' },
+      role: 'hr_admin',
+      status: 'active',
+      joinDate: '2019-01-01',
+      location: 'New York',
+    },
     {
       id: 'usr-employee-1',
+      employeeId: 'EMP-001',
       firstName: 'Jane',
       lastName: 'Employee',
       email: 'employee@smarthr.com',
@@ -279,7 +362,7 @@ function createMockEmployees(): EmployeeDetail[] {
       ...seed,
       id,
       companyId: 'co-1',
-      employeeId: `EMP-${String(index + 1).padStart(3, '0')}`,
+      employeeId: seed.employeeId ?? `EMP-${String(index + 1).padStart(3, '0')}`,
       fullName: `${seed.firstName} ${seed.lastName}`,
     })
     return EmployeeDetailSchema.parse({
@@ -354,6 +437,7 @@ function assignOrgHierarchy(employees: EmployeeDetail[]): EmployeeDetail[] {
     employees.find((employee) => employee.firstName === firstName && employee.lastName === lastName)
 
   const emily = findByName('Emily', 'Davis')
+  const hrAdmin = employees.find((employee) => employee.id === 'usr-admin-1')
   const sarah = findByName('Sarah', 'Chen')
   const michael = findByName('Michael', 'Torres')
   const anna = findByName('Anna', 'Martinez')
@@ -388,6 +472,14 @@ function assignOrgHierarchy(employees: EmployeeDetail[]): EmployeeDetail[] {
     employee.managerName = manager.fullName
     if (employee.work) {
       employee.work.reportingManager = { id: manager.id, name: manager.fullName }
+    }
+  }
+
+  if (emily && hrAdmin) {
+    emily.managerId = hrAdmin.id
+    emily.managerName = hrAdmin.fullName
+    if (emily.work) {
+      emily.work.reportingManager = { id: hrAdmin.id, name: hrAdmin.fullName }
     }
   }
 
@@ -470,7 +562,10 @@ export async function getEmployees(params: {
 
 export async function getEmployee(id: string): Promise<EmployeeDetail> {
   await delay()
-  const employee = companyEmployees().find((e) => e.id === id)
+  const employees = companyEmployees()
+  const employee =
+    employees.find((entry) => entry.id === id) ??
+    employees.find((entry) => entry.email === id)
   if (!employee) {
     throw new Error('Employee not found')
   }

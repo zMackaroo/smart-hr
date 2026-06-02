@@ -1,4 +1,5 @@
-import type { UseFormRegister, FieldErrors } from 'react-hook-form'
+import type { FieldErrors, UseFormSetValue, UseFormWatch } from 'react-hook-form'
+import { Select } from '../../../components/ui/Select'
 import {
   CURRENCY_OPTIONS,
   MONTH_OPTIONS,
@@ -7,7 +8,8 @@ import {
 } from '../../../types/company.types'
 
 interface RegionalPreferencesSectionProps {
-  register: UseFormRegister<CompanySettingsFormInput>
+  watch: UseFormWatch<CompanySettingsFormInput>
+  setValue: UseFormSetValue<CompanySettingsFormInput>
   errors: FieldErrors<CompanySettingsFormInput>
 }
 
@@ -18,72 +20,59 @@ const DATE_FORMAT_OPTIONS = [
 ] as const
 
 export function RegionalPreferencesSection({
-  register,
+  watch,
+  setValue,
   errors,
 }: RegionalPreferencesSectionProps) {
-  const selectClass =
-    'h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25'
-
   return (
     <section className="rounded-lg border border-border/70 bg-surface p-6 shadow-card">
       <h2 className="mb-4 text-base font-semibold text-primary">Regional Preferences</h2>
       <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Timezone</label>
-          <select className={selectClass} {...register('timezone')}>
-            {TIMEZONE_OPTIONS.map((tz) => (
-              <option key={tz.value} value={tz.value}>
-                {tz.label}
-              </option>
-            ))}
-          </select>
-          {errors.timezone && <p className="mt-1 text-xs text-error">{errors.timezone.message}</p>}
-        </div>
+        <Select
+          label="Timezone"
+          value={watch('timezone')}
+          onChange={(v) => setValue('timezone', v, { shouldValidate: true })}
+          error={errors.timezone?.message}
+          options={TIMEZONE_OPTIONS.map((tz) => ({ value: tz.value, label: tz.label }))}
+        />
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Currency</label>
-          <select className={selectClass} {...register('currency')}>
-            {CURRENCY_OPTIONS.map((c) => (
-              <option key={c.value} value={c.value}>
-                {c.label}
-              </option>
-            ))}
-          </select>
-          {errors.currency && <p className="mt-1 text-xs text-error">{errors.currency.message}</p>}
-        </div>
+        <Select
+          label="Currency"
+          value={watch('currency')}
+          onChange={(v) => setValue('currency', v, { shouldValidate: true })}
+          error={errors.currency?.message}
+          options={CURRENCY_OPTIONS.map((c) => ({ value: c.value, label: c.label }))}
+        />
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Date Format</label>
-          <select className={selectClass} {...register('dateFormat')}>
-            {DATE_FORMAT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Date Format"
+          value={watch('dateFormat')}
+          onChange={(v) => setValue('dateFormat', v as CompanySettingsFormInput['dateFormat'], { shouldValidate: true })}
+          searchable={false}
+          options={DATE_FORMAT_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label }))}
+        />
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Time Format</label>
-          <select className={selectClass} {...register('timeFormat')}>
-            <option value="12h">12-hour (AM/PM)</option>
-            <option value="24h">24-hour</option>
-          </select>
-        </div>
+        <Select
+          label="Time Format"
+          value={watch('timeFormat')}
+          onChange={(v) => setValue('timeFormat', v as CompanySettingsFormInput['timeFormat'], { shouldValidate: true })}
+          searchable={false}
+          options={[
+            { value: '12h', label: '12-hour (AM/PM)' },
+            { value: '24h', label: '24-hour' },
+          ]}
+        />
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Fiscal Year Start Month</label>
-          <select
-            className={selectClass}
-            {...register('fiscalYearStartMonth', { valueAsNumber: true })}
-          >
-            {MONTH_OPTIONS.map((name, index) => (
-              <option key={name} value={index + 1}>
-                {name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Fiscal Year Start Month"
+          value={String(watch('fiscalYearStartMonth'))}
+          onChange={(v) => setValue('fiscalYearStartMonth', Number(v), { shouldValidate: true })}
+          searchable={false}
+          options={MONTH_OPTIONS.map((name, index) => ({
+            value: String(index + 1),
+            label: name,
+          }))}
+        />
       </div>
     </section>
   )

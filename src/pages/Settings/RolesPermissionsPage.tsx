@@ -2,6 +2,7 @@ import { Copy, Plus } from 'lucide-react'
 import { ConfirmDialog } from '../../components/shared/ConfirmDialog'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Button } from '../../components/ui/Button'
+import { Select } from '../../components/ui/Select'
 import { AddRoleModal } from './components/AddRoleModal'
 import { PermissionMatrix } from './components/PermissionMatrix'
 import { RoleListPanel } from './components/RoleListPanel'
@@ -43,21 +44,13 @@ export function RolesPermissionsPage() {
       />
 
       <div className="mb-4 lg:hidden">
-        <label htmlFor="role-select" className="mb-1.5 block text-sm font-medium text-primary">
-          Role
-        </label>
-        <select
+        <Select
           id="role-select"
+          label="Role"
           value={vm.selectedRoleId}
-          onChange={(event) => vm.setSelectedRoleId(event.target.value)}
-          className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-        >
-          {vm.roles.map((role) => (
-            <option key={role.id} value={role.id}>
-              {role.name}
-            </option>
-          ))}
-        </select>
+          onChange={vm.setSelectedRoleId}
+          options={vm.roles.map((role) => ({ value: role.id, label: role.name }))}
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">

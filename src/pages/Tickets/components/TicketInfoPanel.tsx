@@ -1,4 +1,5 @@
 import { Button } from '../../../components/ui/Button'
+import { Select } from '../../../components/ui/Select'
 import { PermissionGate } from '../../../components/shared/PermissionGate'
 import { formatDate } from '../../../utils/date.utils'
 import {
@@ -36,9 +37,6 @@ export function TicketInfoPanel({
   onCloseTicket,
   onReopen,
 }: TicketInfoPanelProps) {
-  const selectClass =
-    'h-9 w-full rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25'
-
   return (
     <div className="rounded-lg border border-border/70 bg-surface p-5 shadow-card">
       <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-secondary">
@@ -55,18 +53,16 @@ export function TicketInfoPanel({
                 action="edit"
                 fallback={<TicketStatusBadge status={ticket.status} />}
               >
-                <select
-                  className={selectClass}
+                <Select
                   value={ticket.status}
+                  onChange={(v) => onUpdateStatus(v as TicketStatus)}
                   disabled={isSubmitting}
-                  onChange={(e) => onUpdateStatus(e.target.value as TicketStatus)}
-                >
-                  {STATUS_OPTIONS.map((s) => (
-                    <option key={s} value={s}>
-                      {s === 'in_progress' ? 'In Progress' : s.charAt(0).toUpperCase() + s.slice(1)}
-                    </option>
-                  ))}
-                </select>
+                  searchable={false}
+                  options={STATUS_OPTIONS.map((s) => ({
+                    value: s,
+                    label: s === 'in_progress' ? 'In Progress' : s.charAt(0).toUpperCase() + s.slice(1),
+                  }))}
+                />
               </PermissionGate>
             ) : (
               <TicketStatusBadge status={ticket.status} />
@@ -83,18 +79,16 @@ export function TicketInfoPanel({
                 action="edit"
                 fallback={<TicketPriorityBadge priority={ticket.priority} />}
               >
-                <select
-                  className={selectClass}
+                <Select
                   value={ticket.priority}
+                  onChange={(v) => onUpdatePriority(v as TicketPriority)}
                   disabled={isSubmitting}
-                  onChange={(e) => onUpdatePriority(e.target.value as TicketPriority)}
-                >
-                  {PRIORITY_OPTIONS.map((p) => (
-                    <option key={p} value={p}>
-                      {p.charAt(0).toUpperCase() + p.slice(1)}
-                    </option>
-                  ))}
-                </select>
+                  searchable={false}
+                  options={PRIORITY_OPTIONS.map((p) => ({
+                    value: p,
+                    label: p.charAt(0).toUpperCase() + p.slice(1),
+                  }))}
+                />
               </PermissionGate>
             ) : (
               <TicketPriorityBadge priority={ticket.priority} />

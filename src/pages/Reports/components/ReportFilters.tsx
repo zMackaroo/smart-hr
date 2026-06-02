@@ -1,4 +1,5 @@
 import { Button } from '../../../components/ui/Button'
+import { Select, selectTriggerClassName } from '../../../components/ui/Select'
 import type { Department } from '../../../types/department.types'
 import {
   REPORT_FILTER_CONFIG,
@@ -86,8 +87,6 @@ export function ReportFilters({
   onApply,
 }: ReportFiltersProps) {
   const config = REPORT_FILTER_CONFIG[reportType]
-  const selectClass =
-    'h-10 rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25'
 
   const update = (patch: Partial<ReportFilter>) => onChange({ ...filters, ...patch })
 
@@ -108,37 +107,28 @@ export function ReportFilters({
   return (
     <div className="flex flex-wrap items-end gap-3">
       {config.includes('month') && (
-        <div>
-          <label className="mb-1 block text-xs font-medium text-muted">Month</label>
-          <select
-            className={selectClass}
-            value={filters.month ?? ''}
-            onChange={(e) => update({ month: Number(e.target.value) })}
-          >
-            {MONTHS.map((name, index) => (
-              <option key={name} value={index + 1}>
-                {name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Month"
+          value={String(filters.month ?? 1)}
+          onChange={(value) => update({ month: Number(value) })}
+          options={MONTHS.map((name, index) => ({
+            value: String(index + 1),
+            label: name,
+          }))}
+          searchable={false}
+          className="min-w-[9rem]"
+        />
       )}
 
       {config.includes('year') && (
-        <div>
-          <label className="mb-1 block text-xs font-medium text-muted">Year</label>
-          <select
-            className={selectClass}
-            value={filters.year ?? ''}
-            onChange={(e) => update({ year: Number(e.target.value) })}
-          >
-            {years.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Year"
+          value={String(filters.year ?? currentYear)}
+          onChange={(value) => update({ year: Number(value) })}
+          options={years.map((year) => ({ value: String(year), label: String(year) }))}
+          searchable={false}
+          className="min-w-[7rem]"
+        />
       )}
 
       {config.includes('dateFrom') && (
@@ -146,7 +136,7 @@ export function ReportFilters({
           <label className="mb-1 block text-xs font-medium text-muted">Date From</label>
           <input
             type="date"
-            className={selectClass}
+            className={selectTriggerClassName}
             value={filters.dateFrom ?? ''}
             onChange={(e) => update({ dateFrom: e.target.value })}
           />
@@ -158,7 +148,7 @@ export function ReportFilters({
           <label className="mb-1 block text-xs font-medium text-muted">Date To</label>
           <input
             type="date"
-            className={selectClass}
+            className={selectTriggerClassName}
             value={filters.dateTo ?? ''}
             onChange={(e) => update({ dateTo: e.target.value })}
           />
@@ -166,74 +156,60 @@ export function ReportFilters({
       )}
 
       {config.includes('departmentId') && (
-        <div>
-          <label className="mb-1 block text-xs font-medium text-muted">Department</label>
-          <select
-            className={selectClass}
-            value={filters.departmentId ?? ''}
-            onChange={(e) => update({ departmentId: e.target.value || undefined })}
-          >
-            <option value="">All Departments</option>
-            {departments.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Department"
+          value={filters.departmentId ?? ''}
+          onChange={(value) => update({ departmentId: value || undefined })}
+          options={[
+            { value: '', label: 'All Departments' },
+            ...departments.map((department) => ({
+              value: department.id,
+              label: department.name,
+            })),
+          ]}
+          placeholder="All Departments"
+          className="min-w-[11rem]"
+        />
       )}
 
       {config.includes('status') && (
-        <div>
-          <label className="mb-1 block text-xs font-medium text-muted">Status</label>
-          <select
-            className={selectClass}
-            value={filters.status ?? ''}
-            onChange={(e) => update({ status: e.target.value || undefined })}
-          >
-            {statusOptions.map((opt) => (
-              <option key={opt.label} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Status"
+          value={filters.status ?? ''}
+          onChange={(value) => update({ status: value || undefined })}
+          options={statusOptions}
+          placeholder="All Statuses"
+          searchable={false}
+          className="min-w-[10rem]"
+        />
       )}
 
       {config.includes('projectId') && (
-        <div>
-          <label className="mb-1 block text-xs font-medium text-muted">Project</label>
-          <select
-            className={selectClass}
-            value={filters.projectId ?? ''}
-            onChange={(e) => update({ projectId: e.target.value || undefined })}
-          >
-            <option value="">All Projects</option>
-            {projects.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Project"
+          value={filters.projectId ?? ''}
+          onChange={(value) => update({ projectId: value || undefined })}
+          options={[
+            { value: '', label: 'All Projects' },
+            ...projects.map((project) => ({ value: project.id, label: project.name })),
+          ]}
+          placeholder="All Projects"
+          className="min-w-[11rem]"
+        />
       )}
 
       {config.includes('employeeId') && (
-        <div>
-          <label className="mb-1 block text-xs font-medium text-muted">Employee</label>
-          <select
-            className={selectClass}
-            value={filters.employeeId ?? ''}
-            onChange={(e) => update({ employeeId: e.target.value || undefined })}
-          >
-            <option value="">All Users</option>
-            {employees.map((e) => (
-              <option key={e.id} value={e.id}>
-                {e.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Employee"
+          value={filters.employeeId ?? ''}
+          onChange={(value) => update({ employeeId: value || undefined })}
+          options={[
+            { value: '', label: 'All Users' },
+            ...employees.map((employee) => ({ value: employee.id, label: employee.name })),
+          ]}
+          placeholder="All Users"
+          className="min-w-[11rem]"
+        />
       )}
 
       <Button onClick={onApply} disabled={isLoading}>

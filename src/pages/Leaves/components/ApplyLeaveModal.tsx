@@ -5,6 +5,7 @@ import { calculateLeaveDays } from '../../../api/leaves.api'
 import { Button } from '../../../components/ui/Button'
 import { Input } from '../../../components/ui/Input'
 import { Modal } from '../../../components/ui/Modal'
+import { Select } from '../../../components/ui/Select'
 import {
   ApplyLeaveFormSchema,
   type ApplyLeaveFormInput,
@@ -46,6 +47,7 @@ export function ApplyLeaveModal({
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors },
   } = form
 
@@ -90,32 +92,28 @@ export function ApplyLeaveModal({
       }
     >
       <form className="space-y-4">
-        <div>
-          <label className="mb-1 block text-sm font-medium text-primary">Leave Type</label>
-          <select
-            className="h-10 w-full rounded-md border border-border bg-surface px-3 text-sm"
-            {...register('leaveTypeId')}
-          >
-            <option value="">Select leave type</option>
-            {activeTypes.map((lt) => {
+        <Select
+          label="Leave Type"
+          value={leaveTypeId}
+          onChange={(v) => setValue('leaveTypeId', v, { shouldValidate: true })}
+          error={errors.leaveTypeId?.message}
+          placeholder="Select leave type"
+          options={[
+            { value: '', label: 'Select leave type' },
+            ...activeTypes.map((lt) => {
               const balance = balances.find((b) => b.leaveTypeId === lt.id)
-              return (
-                <option key={lt.id} value={lt.id}>
-                  {lt.name}
-                  {balance ? ` (${balance.remaining} days left)` : ''}
-                </option>
-              )
-            })}
-          </select>
-          {errors.leaveTypeId && (
-            <p className="mt-1 text-xs text-error">{errors.leaveTypeId.message}</p>
-          )}
-          {selectedBalance && (
-            <p className="mt-1 text-xs text-secondary">
-              {selectedBalance.remaining} of {selectedBalance.allocated} days remaining
-            </p>
-          )}
-        </div>
+              return {
+                value: lt.id,
+                label: `${lt.name}${balance ? ` (${balance.remaining} days left)` : ''}`,
+              }
+            }),
+          ]}
+        />
+        {selectedBalance && (
+          <p className="-mt-2 text-xs text-secondary">
+            {selectedBalance.remaining} of {selectedBalance.allocated} days remaining
+          </p>
+        )}
 
         <div className="grid grid-cols-2 gap-4">
           <Input label="From Date" type="date" error={errors.fromDate?.message} {...register('fromDate')} />

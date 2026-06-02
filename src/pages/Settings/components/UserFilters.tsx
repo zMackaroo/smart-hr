@@ -1,5 +1,6 @@
 import type { PlatformUserStatus } from '../../../types/user.types'
 import type { Role } from '../../../types/permission.types'
+import { Select, selectTriggerClassName } from '../../../components/ui/Select'
 
 interface UserFiltersProps {
   searchQuery: string
@@ -12,9 +13,6 @@ interface UserFiltersProps {
   showing: number
   total: number
 }
-
-const selectClassName =
-  'h-10 rounded-md border border-border bg-surface px-3 text-sm text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20'
 
 export function UserFilters({
   searchQuery,
@@ -39,45 +37,36 @@ export function UserFilters({
           value={searchQuery}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search by name or email..."
-          className={selectClassName + ' w-full'}
+          className={selectTriggerClassName}
         />
       </div>
 
-      <div>
-        <label htmlFor="user-role-filter" className="mb-1 block text-sm font-medium text-primary">
-          Role
-        </label>
-        <select
-          id="user-role-filter"
-          value={roleFilter}
-          onChange={(event) => onRoleFilterChange(event.target.value)}
-          className={selectClassName}
-        >
-          <option value="">All Roles</option>
-          {roles.map((role) => (
-            <option key={role.id} value={role.id}>
-              {role.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <Select
+        label="Role"
+        value={roleFilter}
+        onChange={onRoleFilterChange}
+        options={[
+          { value: '', label: 'All Roles' },
+          ...roles.map((role) => ({ value: role.id, label: role.name })),
+        ]}
+        placeholder="All Roles"
+        className="min-w-[10rem]"
+      />
 
-      <div>
-        <label htmlFor="user-status-filter" className="mb-1 block text-sm font-medium text-primary">
-          Status
-        </label>
-        <select
-          id="user-status-filter"
-          value={statusFilter}
-          onChange={(event) => onStatusFilterChange(event.target.value as PlatformUserStatus | '')}
-          className={selectClassName}
-        >
-          <option value="">All Statuses</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-          <option value="invited">Invited</option>
-        </select>
-      </div>
+      <Select
+        label="Status"
+        value={statusFilter}
+        onChange={(value) => onStatusFilterChange(value as PlatformUserStatus | '')}
+        options={[
+          { value: '', label: 'All Statuses' },
+          { value: 'active', label: 'Active' },
+          { value: 'inactive', label: 'Inactive' },
+          { value: 'invited', label: 'Invited' },
+        ]}
+        placeholder="All Statuses"
+        searchable={false}
+        className="min-w-[10rem]"
+      />
 
       <p className="text-sm text-secondary lg:pb-2">
         Showing {showing} of {total}
